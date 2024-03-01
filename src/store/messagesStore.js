@@ -157,6 +157,27 @@ const getters = {
 		return getters.getLastKnownMessageId(token) < conversation.lastMessage.id
 	},
 
+	/**
+	 * Returns whether the conversation is in 'history' mode, which means that the current
+	 * message list contain message context which is older than 24 hours
+	 * or amount of unread messages is larger than 300 messages.
+	 * If true, the call to "lookForNewMessages" will be blocked.
+	 *
+	 * @param {object} state the state object.
+	 * @param {object} getters the getters object.
+	 * @return {boolean} true if context is old enough, false otherwise
+	 */
+	isConversationInHistoryMode: (state, getters) => (token) => {
+		const conversation = getters.conversation(token)
+		const lastKnownMessage = getters.message(token, getters.getLastKnownMessageId(token))
+		if (!conversation || !lastKnownMessage) {
+			return false
+		}
+
+		return conversation.lastMessage.timestamp - lastKnownMessage.timestamp > CHAT.HISTORY_LIMIT_TIME
+			|| conversation.unreadMessages > CHAT.HISTORY_LIMIT_AMOUNT
+	},
+
 	isMessageListPopulated: (state) => (token) => {
 		return !!state.loadedMessages[token]
 	},
@@ -413,6 +434,9 @@ const mutations = {
 		}
 		if (state.messages[token]) {
 			Vue.delete(state.messages, token)
+		}
+		if (state.loadedMessages[token]) {
+			Vue.delete(state.loadedMessages, token)
 		}
 	},
 
