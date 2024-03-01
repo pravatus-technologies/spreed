@@ -873,8 +873,9 @@ const actions = {
 	 * @param {string} data.lastKnownMessageId last known message id;
 	 * @param {number} data.minimumVisible Minimum number of chat messages we want to load
 	 * @param {boolean} data.includeLastKnown whether to include the last known message in the response;
+	 * @param {number} [data.lookIntoFuture=0] direction of message fetch
 	 */
-	async fetchMessages(context, { token, lastKnownMessageId, includeLastKnown, requestOptions, minimumVisible }) {
+	async fetchMessages(context, { token, lastKnownMessageId, includeLastKnown, requestOptions, minimumVisible, lookIntoFuture = 0 }) {
 		minimumVisible = (typeof minimumVisible === 'undefined') ? CHAT.MINIMUM_VISIBLE : minimumVisible
 
 		context.dispatch('cancelFetchMessages')
@@ -888,6 +889,7 @@ const actions = {
 			token,
 			lastKnownMessageId,
 			includeLastKnown,
+			lookIntoFuture,
 			limit: CHAT.FETCH_LIMIT,
 		}, requestOptions)
 
@@ -921,7 +923,7 @@ const actions = {
 		})
 
 		if (response.headers['x-chat-last-given']) {
-			context.dispatch('setFirstKnownMessageId', {
+			context.dispatch(lookIntoFuture ? 'setLastKnownMessageId' : 'setFirstKnownMessageId', {
 				token,
 				id: parseInt(response.headers['x-chat-last-given'], 10),
 			})
@@ -947,6 +949,7 @@ const actions = {
 				token,
 				lastKnownMessageId: context.getters.getFirstKnownMessageId(token),
 				includeLastKnown,
+				lookIntoFuture,
 				minimumVisible,
 			})
 		}
@@ -1036,6 +1039,7 @@ const actions = {
 				token,
 				lastKnownMessageId: context.getters.getFirstKnownMessageId(token),
 				includeLastKnown: false,
+				lookIntoFuture: 0,
 				minimumVisible: minimumVisible * 2,
 			})
 		}

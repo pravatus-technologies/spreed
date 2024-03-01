@@ -741,7 +741,7 @@ export default {
 			const followInNewMessages = this.conversation.lastMessage
 				&& this.conversation.lastReadMessage === this.conversation.lastMessage.id
 
-			await this.getNewMessages(followInNewMessages)
+			await this.getNewMessagesPolling(followInNewMessages)
 		},
 
 		async getMessageContext(messageId) {
@@ -774,6 +774,7 @@ export default {
 					token: this.token,
 					lastKnownMessageId: this.$store.getters.getFirstKnownMessageId(this.token),
 					includeLastKnown,
+					lookIntoFuture: 0,
 					minimumVisible: CHAT.MINIMUM_VISIBLE,
 				})
 			} catch (exception) {
@@ -803,7 +804,7 @@ export default {
 		 *
 		 * @param {boolean} scrollToBottom Whether we should try to automatically scroll to the bottom
 		 */
-		async getNewMessages(scrollToBottom = true) {
+		async getNewMessagesPolling(scrollToBottom = true) {
 			if (this.destroying) {
 				return
 			}
@@ -833,7 +834,7 @@ export default {
 					// This is not an error, so reset error timeout and poll again
 					this.pollingErrorTimeout = 1
 					setTimeout(() => {
-						this.getNewMessages()
+						this.getNewMessagesPolling()
 					}, 500)
 					return
 				}
@@ -846,13 +847,13 @@ export default {
 				console.debug('Error happened while getting chat messages. Trying again in ', this.pollingErrorTimeout, exception)
 
 				setTimeout(() => {
-					this.getNewMessages()
+					this.getNewMessagesPolling()
 				}, this.pollingErrorTimeout * 1000)
 				return
 			}
 
 			setTimeout(() => {
-				this.getNewMessages()
+				this.getNewMessagesPolling()
 			}, 500)
 		},
 
@@ -1233,7 +1234,7 @@ export default {
 
 		handleNetworkOnline() {
 			console.debug('Restarting polling of new chat messages')
-			this.getNewMessages()
+			this.getNewMessagesPolling()
 		},
 
 		async onRouteChange({ from, to }) {
