@@ -398,7 +398,7 @@ export default {
 				})
 
 				if (statusCode === 202) {
-					showWarning(t('spreed', 'Message deleted successfully, but a bot or Matterbridge is configured and the message might already be distributed to other services'), {
+					window.OCP.Toast.warning(t('spreed', 'Message deleted successfully, but a bot or Matterbridge is configured and the message might already be distributed to other services'), {
 						timeout: TOAST_DEFAULT_TIMEOUT * 2,
 					})
 				} else if (statusCode === 200) {
