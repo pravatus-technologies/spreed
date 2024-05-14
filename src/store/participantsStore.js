@@ -579,7 +579,7 @@ const actions = {
 					actorType: attendee.actorType,
 					internalNote,
 				})
-				showSuccess(t('spreed', 'Participant is banned successfully'))
+				window.OCP.Toast.success(t('spreed', 'Participant is banned successfully'))
 			} catch (error) {
 				window.OCP.Toast.error(t('spreed', 'Error while banning the participant'))
 				console.error('Error while banning the participant: ', error)
