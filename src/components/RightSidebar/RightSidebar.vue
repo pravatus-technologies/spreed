@@ -438,7 +438,7 @@ export default {
 				this.unreadNotificationHandle = null
 			}
 			if (message) {
-				this.unreadNotificationHandle = showMessage(message, {
+				this.unreadNotificationHandle = window.OCP.Toast.message(message, {
 					onClick: () => {
 						this.activeTab = 'chat'
 						this.openSidebar()
