@@ -581,7 +581,7 @@ const actions = {
 				})
 				showSuccess(t('spreed', 'Participant is banned successfully'))
 			} catch (error) {
-				showError(t('spreed', 'Error while banning the participant'))
+				window.OCP.Toast.error(t('spreed', 'Error while banning the participant'))
 				console.error('Error while banning the participant: ', error)
 			}
 		}
@@ -667,7 +667,7 @@ const actions = {
 				context.dispatch('fetchConversation', { token })
 			} else if (!CancelableRequest.isCancel(exception)) {
 				console.error(exception)
-				showError(t('spreed', 'An error occurred while fetching the participants'))
+				window.OCP.Toast.error(t('spreed', 'An error occurred while fetching the participants'))
 			}
 			return null
 		}
@@ -899,7 +899,7 @@ const actions = {
 				EventBus.emit('forbidden-route', error.response.data.ocs.data)
 			} else {
 				console.error(error)
-				showError(t('spreed', 'Failed to join the conversation. Try to reload the page.'))
+				window.OCP.Toast.error(t('spreed', 'Failed to join the conversation. Try to reload the page.'))
 			}
 		}
 	},
