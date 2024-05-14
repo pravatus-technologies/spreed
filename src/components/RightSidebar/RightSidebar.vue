@@ -111,7 +111,8 @@ import InformationOutline from 'vue-material-design-icons/InformationOutline.vue
 import Message from 'vue-material-design-icons/Message.vue'
 import MessageText from 'vue-material-design-icons/MessageText.vue'
 
-import { showMessage } from '@nextcloud/dialogs'
+// eslint-disable-next-line
+// import { showMessage } from '@nextcloud/dialogs'
 import { emit, subscribe, unsubscribe } from '@nextcloud/event-bus'
 import { t } from '@nextcloud/l10n'
 

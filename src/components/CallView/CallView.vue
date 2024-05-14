@@ -120,7 +120,8 @@
 <script>
 import debounce from 'debounce'
 
-import { showMessage } from '@nextcloud/dialogs'
+// eslint-disable-next-line
+// import { showMessage } from '@nextcloud/dialogs'
 import { subscribe, unsubscribe } from '@nextcloud/event-bus'
 import { t } from '@nextcloud/l10n'
 
@@ -554,11 +555,11 @@ export default {
 			// sometimes the nick name is not available yet...
 			if (nickName) {
 				if (raisedHand?.state) {
-					showMessage(t('spreed', '{nickName} raised their hand.', { nickName }))
+					window.OCP.Toast.message(t('spreed', '{nickName} raised their hand.', { nickName }))
 				}
 			} else {
 				if (raisedHand?.state) {
-					showMessage(t('spreed', 'A participant raised their hand.'))
+					window.OCP.Toast.message(t('spreed', 'A participant raised their hand.'))
 				}
 			}
 
