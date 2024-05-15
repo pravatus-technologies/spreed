@@ -319,6 +319,7 @@
 				</NcCheckboxRadioSwitch>
 				<template v-if="isBanParticipant">
 					<NcTextField v-if="isBanParticipant"
+						v-model="internalNote"
 						class="participant-dialog__input"
 						:label="t('spreed', 'Internal note (reason to ban)')"
 						:value.sync="internalNote" />
