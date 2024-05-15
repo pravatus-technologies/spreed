@@ -2,7 +2,6 @@
  * SPDX-FileCopyrightText: 2021 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { createLocalVue } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import { cloneDeep } from 'lodash'
 import { createPinia, setActivePinia } from 'pinia'
@@ -75,7 +74,6 @@ describe('messagesStore', () => {
 		},
 	}
 
-	let localVue = null
 	let testStoreConfig
 	let store = null
 	let getActorIdMock
@@ -89,8 +87,6 @@ describe('messagesStore', () => {
 	let reactionsStore
 
 	beforeEach(() => {
-		localVue = createLocalVue()
-		localVue.use(Vuex)
 		setActivePinia(createPinia())
 		reactionsStore = useReactionsStore()
 
