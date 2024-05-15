@@ -314,7 +314,7 @@
 			:container="container">
 			<p> {{ removeDialogMessage }} </p>
 			<template v-if="supportBanV1 && showPermissionsOptions">
-				<NcCheckboxRadioSwitch :checked.sync="isBanParticipant">
+				<NcCheckboxRadioSwitch v-model="isBanParticipant">
 					{{ t('spreed', 'Also ban from this conversation') }}
 				</NcCheckboxRadioSwitch>
 				<template v-if="isBanParticipant">
