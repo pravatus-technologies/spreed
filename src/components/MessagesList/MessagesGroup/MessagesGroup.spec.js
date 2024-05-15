@@ -40,7 +40,7 @@ describe('MessagesGroup.vue', () => {
 		const wrapper = shallowMount(MessagesGroup, {
 			localVue,
 			store,
-			propsData: {
+			props: {
 				id: 123,
 				token: TOKEN,
 				previousMessageId: 90,
@@ -134,7 +134,7 @@ describe('MessagesGroup.vue', () => {
 		const wrapper = shallowMount(MessagesGroup, {
 			localVue,
 			store,
-			propsData: {
+			props: {
 				id: 123,
 				token: TOKEN,
 				previousMessageId: 90,
@@ -194,7 +194,7 @@ describe('MessagesGroup.vue', () => {
 		const wrapper = shallowMount(MessagesGroup, {
 			localVue,
 			store,
-			propsData: {
+			props: {
 				id: 123,
 				token: TOKEN,
 				previousMessageId: 90,

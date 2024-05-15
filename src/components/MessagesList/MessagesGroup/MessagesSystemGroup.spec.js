@@ -76,7 +76,7 @@ describe('MessagesSystemGroup.vue', () => {
 		const wrapper = shallowMount(MessagesSystemGroup, {
 			localVue,
 			store,
-			propsData: {
+			props: {
 				id: 123,
 				token: TOKEN,
 				previousMessageId: 90,
@@ -184,7 +184,7 @@ describe('MessagesSystemGroup.vue', () => {
 			const wrapper = shallowMount(MessagesSystemGroup, {
 				localVue,
 				store,
-				propsData: {
+				props: {
 					id: 123,
 					token: TOKEN,
 					previousMessageId: 90,
@@ -230,7 +230,7 @@ describe('MessagesSystemGroup.vue', () => {
 			const wrapper = shallowMount(MessagesSystemGroup, {
 				localVue,
 				store,
-				propsData: {
+				props: {
 					id: 123,
 					token: TOKEN,
 					previousMessageId: 90,
@@ -388,7 +388,7 @@ describe('MessagesSystemGroup.vue', () => {
 			const wrapper = shallowMount(MessagesSystemGroup, {
 				localVue,
 				store,
-				propsData: {
+				props: {
 					id: 123,
 					token: TOKEN,
 					previousMessageId: 90,
@@ -413,7 +413,7 @@ describe('MessagesSystemGroup.vue', () => {
 			const wrapper = shallowMount(MessagesSystemGroup, {
 				localVue,
 				store,
-				propsData: {
+				props: {
 					id: 123,
 					token: TOKEN,
 					previousMessageId: 90,
@@ -438,7 +438,7 @@ describe('MessagesSystemGroup.vue', () => {
 			const wrapper = shallowMount(MessagesSystemGroup, {
 				localVue,
 				store,
-				propsData: {
+				props: {
 					id: 123,
 					token: TOKEN,
 					previousMessageId: 90,
@@ -463,7 +463,7 @@ describe('MessagesSystemGroup.vue', () => {
 			const wrapper = shallowMount(MessagesSystemGroup, {
 				localVue,
 				store,
-				propsData: {
+				props: {
 					id: 123,
 					token: TOKEN,
 					previousMessageId: 90,
