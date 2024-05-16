@@ -309,7 +309,7 @@
 
 		<!-- Confirmation required to remove participant -->
 		<NcDialog v-if="isRemoveDialogOpen"
-			:open.sync="isRemoveDialogOpen"
+			v-model:open="isRemoveDialogOpen"
 			:name="removeParticipantLabel"
 			:container="container">
 			<p> {{ removeDialogMessage }} </p>
@@ -321,8 +321,7 @@
 					<NcTextField v-if="isBanParticipant"
 						v-model="internalNote"
 						class="participant-dialog__input"
-						:label="t('spreed', 'Internal note (reason to ban)')"
-						:value.sync="internalNote" />
+						:label="t('spreed', 'Internal note (reason to ban)')" />
 				</template>
 			</template>
 			<template #actions>
