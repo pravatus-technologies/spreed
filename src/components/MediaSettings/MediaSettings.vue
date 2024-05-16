@@ -101,12 +101,12 @@
 					:devices="devices"
 					:device-id="audioInputId"
 					@refresh="updateDevices"
-					@update:deviceId="handleAudioInputIdChange" />
+					@update:device-id="handleAudioInputIdChange" />
 				<MediaDevicesSelector kind="videoinput"
 					:devices="devices"
 					:device-id="videoInputId"
 					@refresh="updateDevices"
-					@update:deviceId="handleVideoInputIdChange" />
+					@update:device-id="handleVideoInputIdChange" />
 				<MediaDevicesSpeakerTest />
 			</div>
 
@@ -120,7 +120,7 @@
 				class="checkbox"
 				:model-value="showMediaSettings || showRecordingWarning"
 				:disabled="showRecordingWarning"
-				@update:modelValue="setShowMediaSettings">
+				@update:model-value="setShowMediaSettings">
 				{{ t('spreed', 'Always show preview for this conversation') }}
 			</NcCheckboxRadioSwitch>
 
@@ -145,7 +145,7 @@
 					</p>
 					<NcCheckboxRadioSwitch class="checkbox--warning"
 						:model-value="recordingConsentGiven"
-						@update:modelValue="setRecordingConsentGiven">
+						@update:model-value="setRecordingConsentGiven">
 						{{ t('spreed', 'Give consent to the recording of this call') }}
 					</NcCheckboxRadioSwitch>
 				</template>
