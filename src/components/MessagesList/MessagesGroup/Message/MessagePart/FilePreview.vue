@@ -46,7 +46,7 @@
 			tabindex="1"
 			type="primary"
 			:aria-label="removeAriaLabel"
-			@click="$emit('remove-file', file.id)">
+			@click="$emit('removeFile', file.id)">
 			<template #icon>
 				<Close />
 			</template>
@@ -155,7 +155,7 @@ export default {
 		},
 	},
 
-	emits: ['remove-file'],
+	emits: ['removeFile'],
 
 	setup() {
 		const { openViewer } = useViewer('talk')
@@ -480,7 +480,7 @@ export default {
 		t,
 		handleClick(event) {
 			if (this.isUploadEditor) {
-				this.$emit('remove-file', this.file.id)
+				this.$emit('removeFile', this.file.id)
 				return
 			}
 
