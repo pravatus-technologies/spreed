@@ -390,7 +390,7 @@ export default {
 		subscribe('spreed:select-active-sidebar-tab', this.handleUpdateActive)
 	},
 
-	beforeDestroy() {
+	beforeUnmount() {
 		unsubscribe('spreed:select-active-sidebar-tab', this.handleUpdateActive)
 	},
 
