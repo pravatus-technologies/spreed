@@ -58,9 +58,9 @@
 
 		<!-- Dialog window -->
 		<SharedItemsBrowser v-if="showSharedItemsBrowser"
+			v-model:active-tab="browserActiveTab"
 			:token="token"
 			:shared-items="sharedItems"
-			v-model:active-tab="browserActiveTab"
 			@close="showSharedItemsBrowser = false" />
 	</div>
 </template>
