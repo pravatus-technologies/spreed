@@ -46,7 +46,7 @@
 			tabindex="1"
 			type="primary"
 			:aria-label="removeAriaLabel"
-			@click="$emit('removeFile', file.id)">
+			@click.stop="$emit('removeFile', file.id)">
 			<template #icon>
 				<Close />
 			</template>
