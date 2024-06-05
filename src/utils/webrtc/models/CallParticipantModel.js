@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import { reactive } from 'vue'
 
 import EmitterMixin from '../../EmitterMixin.js'
 
@@ -26,7 +27,7 @@ export default function CallParticipantModel(options) {
 
 	this._superEmitterMixin()
 
-	this.attributes = {
+	this.attributes = reactive({
 		peerId: null,
 		nextcloudSessionId: null,
 		peer: null,
@@ -53,7 +54,7 @@ export default function CallParticipantModel(options) {
 			state: false,
 			timestamp: null,
 		},
-	}
+	})
 
 	this.set('peerId', options.peerId)
 
