@@ -378,9 +378,16 @@ export default {
 		},
 
 		screens() {
+			console.log('screens watcher')
 			this._setScreenVisible()
 
 		},
+		// screens: {
+		// 	deep: true,
+		// 	handler() {
+		// 		this._setScreenVisible()
+		// 	}
+		// },
 
 		callParticipantModelsWithScreen(newValue, previousValue) {
 			// Everytime a new screen is shared, switch to promoted view
@@ -458,6 +465,7 @@ export default {
 		 * @param {Array} models the array of CallParticipantModels
 		 */
 		updateDataFromCallParticipantModels(models) {
+			console.log('updateDataFromCallParticipantModels', models)
 			const addedModels = models.filter(model => !this.sharedDatas[model.attributes.peerId])
 			const removedModelIds = Object.keys(this.sharedDatas).filter(sharedDataId => models.find(model => model.attributes.peerId === sharedDataId) === undefined)
 
@@ -467,15 +475,15 @@ export default {
 				delete this.sharedDatas[removedModelId]
 
 				this.speakingUnwatchers[removedModelId]()
-				// Not reactive, but not a problem
+				// FIXME Not reactive, but not a problem?
 				delete this.speakingUnwatchers[removedModelId]
 
 				this.screenUnwatchers[removedModelId]()
-				// Not reactive, but not a problem
+				// FIXME Not reactive, but not a problem?
 				delete this.screenUnwatchers[removedModelId]
 
 				this.raisedHandUnwatchers[removedModelId]()
-				// Not reactive, but not a problem
+				// FIXME Not reactive, but not a problem?
 				delete this.raisedHandUnwatchers[removedModelId]
 
 				const index = this.speakers.findIndex(speaker => speaker.id === removedModelId)
@@ -493,7 +501,7 @@ export default {
 
 				this.sharedDatas[addedModel.attributes.peerId] = sharedData
 
-				// Not reactive, but not a problem
+				// FIXME Not reactive, but not a problem?
 				this.speakingUnwatchers[addedModel.attributes.peerId] = this.$watch(function() {
 					return addedModel.attributes.speaking
 				}, function(speaking) {
@@ -505,14 +513,14 @@ export default {
 					active: false,
 				})
 
-				// Not reactive, but not a problem
+				// FIXME Not reactive, but not a problem?
 				this.screenUnwatchers[addedModel.attributes.peerId] = this.$watch(function() {
 					return addedModel.attributes.screen
 				}, function(screen) {
 					this._setScreenAvailable(addedModel.attributes.peerId, screen)
 				})
 
-				// Not reactive, but not a problem
+				// FIXME Not reactive, but not a problem? - at least works
 				this.raisedHandUnwatchers[addedModel.attributes.peerId] = this.$watch(function() {
 					return addedModel.attributes.raisedHand
 				}, function(raisedHand) {
@@ -581,6 +589,7 @@ export default {
 		},
 
 		_setScreenAvailable(id, screen) {
+			console.log('_setScreenAvailable', id, screen)
 			if (screen) {
 				this.screens.unshift(id)
 
@@ -628,6 +637,7 @@ export default {
 		},
 
 		_setScreenVisible() {
+			console.log('_setScreenVisible', this.sharedDatas)
 			this.localSharedData.screenVisible = false
 
 			Object.values(this.sharedDatas).forEach(sharedData => {

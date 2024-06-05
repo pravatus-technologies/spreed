@@ -116,6 +116,7 @@ CallParticipantModel.prototype = {
 	},
 
 	_handlePeerStreamAdded(peer) {
+		// FIXME store as a non-reactive, raw value using toRaw to not have proxy created for Peer at all.
 		if (toRaw(this.get('peer')) === toRaw(peer)) {
 			this.set('stream', this.get('peer').stream || null)
 
