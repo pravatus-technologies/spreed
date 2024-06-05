@@ -2,7 +2,7 @@
  * SPDX-FileCopyrightText: 2019 Nextcloud GmbH and Nextcloud contributors
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-import { reactive } from 'vue'
+import { reactive, toRaw } from 'vue'
 
 import EmitterMixin from '../../EmitterMixin.js'
 
@@ -116,25 +116,25 @@ CallParticipantModel.prototype = {
 	},
 
 	_handlePeerStreamAdded(peer) {
-		if (this.get('peer') === peer) {
+		if (toRaw(this.get('peer')) === toRaw(peer)) {
 			this.set('stream', this.get('peer').stream || null)
 
 			// "peer.nick" is set only for users and when the MCU is not used.
 			if (this.get('peer').nick !== undefined) {
 				this.set('name', this.get('peer').nick)
 			}
-		} else if (this.get('screenPeer') === peer) {
+		} else if (toRaw(this.get('screenPeer')) === toRaw(peer)) {
 			this.set('screen', this.get('screenPeer').stream || null)
 		}
 	},
 
 	_handlePeerStreamRemoved(peer) {
-		if (this.get('peer') === peer) {
+		if (toRaw(this.get('peer')) === toRaw(peer)) {
 			this.set('stream', null)
 			this.set('audioAvailable', undefined)
 			this.set('speaking', undefined)
 			this.set('videoAvailable', undefined)
-		} else if (this.get('screenPeer') === peer) {
+		} else if (toRaw(this.get('screenPeer')) === toRaw(peer)) {
 			this.set('screen', null)
 		}
 	},

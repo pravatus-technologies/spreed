@@ -362,9 +362,12 @@ export default {
 			this.adjustSimulcastQuality()
 		},
 
-		speakers(value) {
-			if (value) {
-				this._setPromotedParticipant()
+		speakers: {
+			deep: true,
+			handler(value) {
+				if (value) {
+					this._setPromotedParticipant()
+				}
 			}
 		},
 
