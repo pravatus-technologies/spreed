@@ -135,6 +135,14 @@ describe('signalingStore', () => {
 			{ userid: '', user: { displayname: 'Guest' }, sessionid: 'signaling-id-4', roomsessionid: 'session-id-4' },
 		]
 
+		const participantsChangedPayload = [
+			{ userId: 'user1', sessionId: 'signaling-id-1', inCall: 7, participantType: 1, lastPing: 1717192800, participantPermissions: 254 },
+			{ userId: 'user2', sessionId: 'signaling-id-2', inCall: 7, participantType: 3, lastPing: 1717192800, participantPermissions: 254 },
+			{ userId: 'user2', sessionId: 'signaling-id-3', inCall: 0, participantType: 3, lastPing: 1717192800, participantPermissions: 254 },
+			{ userId: '', displayName: 'Guest New', sessionId: 'signaling-id-4', inCall: 7, participantType: 6, lastPing: 1717192800, participantPermissions: 254 },
+			{ userId: '', sessionId: 'signaling-id-unknown', inCall: 7, participantType: 3, lastPing: 1717192800, participantPermissions: 254 },
+		]
+
 		it('should return a mapped object for a known session', () => {
 			// Arrange
 			populateParticipantsStore()
@@ -215,6 +223,44 @@ describe('signalingStore', () => {
 			expect(vuexStore.commit).toHaveBeenNthCalledWith(6, 'updateParticipant',
 				{ token: TOKEN, attendeeId: 3, updatedData: { inCall: 0, sessionIds: [] } })
 
+		})
+
+		it('should update participant objects for a known session on change', () => {
+			// Arrange
+			jest.spyOn(vuexStore, 'commit')
+			populateParticipantsStore()
+			signalingStore.updateParticipantsJoinedFromStandaloneSignaling(TOKEN, participantsJoinedPayload)
+
+			// Act
+			signalingStore.updateParticipantsChangedFromStandaloneSignaling(TOKEN, participantsChangedPayload)
+
+			// Assert
+			expect(vuexStore.commit).toHaveBeenCalledTimes(6)
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(4, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 1, updatedData: { inCall: 7, participantType: 1, lastPing: 1717192800, permissions: 254 } })
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(5, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 2, updatedData: { inCall: 7, participantType: 3, lastPing: 1717192800, permissions: 254 } })
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(6, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 3, updatedData: { displayName: 'Guest New', inCall: 7, participantType: 6, lastPing: 1717192800, permissions: 254 } })
+		})
+
+		it('should update participant objects for a known session on call disconnect', () => {
+			// Arrange
+			jest.spyOn(vuexStore, 'commit')
+			populateParticipantsStore()
+			signalingStore.updateParticipantsJoinedFromStandaloneSignaling(TOKEN, participantsJoinedPayload)
+
+			// Act
+			signalingStore.updateParticipantsCallDisconnectedFromStandaloneSignaling(TOKEN)
+
+			// Assert
+			expect(vuexStore.commit).toHaveBeenCalledTimes(6)
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(4, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 1, updatedData: { inCall: 0 } })
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(5, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 2, updatedData: { inCall: 0 } })
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(6, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 3, updatedData: { inCall: 0 } })
 		})
 	})
 })

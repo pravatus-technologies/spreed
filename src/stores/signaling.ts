@@ -3,9 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+import Hex from 'crypto-js/enc-hex.js'
+import SHA1 from 'crypto-js/sha1.js'
 import { defineStore } from 'pinia'
 import Vue from 'vue'
 
+import { useGuestNameStore } from './guestName.js'
 import { ATTENDEE, PARTICIPANT } from '../constants.js'
 import store from '../store/index.js'
 import type { Participant } from '../types'
@@ -36,6 +39,23 @@ type StandaloneSignalingJoinPayload = {
 	sessionid: string, // Standalone signaling id
 	roomsessionid: string, // Nextcloud id
 }
+type StandaloneSignalingChangePayload = {
+	sessionId: string, // Standalone signaling id
+	participantType: number,
+	participantPermissions: number,
+	inCall: number,
+	lastPing: number,
+	nextcloudSessionId?: string, // Nextcloud id
+	userId?: string, // For registered users only
+	displayName?: string,
+}
+type StandaloneUpdatePayload = Record<string, {
+	inCall: number,
+	lastPing: number,
+	permissions: number,
+	participantType: number,
+	displayName?: string,
+}>
 
 type State = {
 	sessions: Record<string, Session>,
@@ -223,5 +243,74 @@ export const useSignalingStore = defineStore('signaling', {
 			}
 		},
 
+		/**
+		 * Update participants changed in store according to data from standalone signaling server
+		 *
+		 * @param token the conversation token;
+		 * @param participants the changed participant objects;
+		 */
+		updateParticipantsChangedFromStandaloneSignaling(token: string, participants: StandaloneSignalingChangePayload[]) {
+			const guestNameStore = useGuestNameStore()
+			const attendeeUsersToUpdate: StandaloneUpdatePayload = {}
+
+			for (const participant of participants) {
+				const session = this.getSignalingSession(participant.sessionId)
+				if (!session?.attendeeId) {
+					continue
+				}
+				const { token, attendeeId } = session
+
+				if (!attendeeUsersToUpdate[attendeeId]) {
+					attendeeUsersToUpdate[attendeeId] = {
+						participantType: participant.participantType,
+						permissions: participant.participantPermissions,
+						inCall: participant.inCall,
+						lastPing: participant.lastPing,
+					}
+				} else {
+					// Participant might join from several devices
+					attendeeUsersToUpdate[attendeeId].inCall
+						= Math.max(attendeeUsersToUpdate[attendeeId].inCall, participant.inCall)
+				}
+				if (participant.displayName) {
+					attendeeUsersToUpdate[attendeeId].displayName = participant.displayName
+					const attendee = store.getters.getParticipant(token, attendeeId) as Participant
+
+					if (attendee.displayName !== participant.displayName
+						&& (participant.participantType === PARTICIPANT.TYPE.GUEST
+							|| participant.participantType === PARTICIPANT.TYPE.GUEST_MODERATOR)) {
+						guestNameStore.addGuestName({
+							token,
+							actorId: Hex.stringify(SHA1(attendee.sessionIds[0])),
+							actorDisplayName: participant.displayName,
+						}, { noUpdate: false })
+					}
+				}
+			}
+
+			for (const [attendeeId, updatedData] of Object.entries(attendeeUsersToUpdate)) {
+				store.commit('updateParticipant', {
+					token,
+					attendeeId: +attendeeId,
+					updatedData,
+				})
+			}
+		},
+
+		/**
+		 * Update participants (end call for everyone) in store according to data from standalone signaling server
+		 *
+		 * @param token conversation token;
+		 */
+		updateParticipantsCallDisconnectedFromStandaloneSignaling(token: string) {
+			const attendeeUsers = store.getters.participantsList(token) as Participant[]
+			for (const attendee of attendeeUsers) {
+				store.commit('updateParticipant', {
+					token,
+					attendeeId: attendee.attendeeId,
+					updatedData: { inCall: PARTICIPANT.CALL_FLAG.DISCONNECTED }
+				})
+			}
+		},
 	},
 })

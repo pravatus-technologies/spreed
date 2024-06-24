@@ -38,6 +38,8 @@ export function useGetParticipants(isActive = ref(true), isTopBar = true) {
 		EventBus.on('signaling-users-in-room', updateUsersFromInternalSignaling)
 		EventBus.on('signaling-users-joined', updateUsersJoinedFromStandaloneSignaling)
 		EventBus.on('signaling-users-left', updateUsersLeftFromStandaloneSignaling)
+		EventBus.on('signaling-users-changed', updateUsersChangedFromStandaloneSignaling)
+		EventBus.on('signaling-all-users-changed-in-call-to-disconnected', updateUsersCallDisconnectedFromStandaloneSignaling)
 		// FIXME this works only temporary until signaling is fixed to be only on the calls
 		// Then we have to search for another solution. Maybe the room list which we update
 		// periodically gets a hash of all online sessions?
@@ -63,6 +65,14 @@ export function useGetParticipants(isActive = ref(true), isTopBar = true) {
 		const signalingStore = useSignalingStore()
 		signalingStore.updateParticipantsLeftFromStandaloneSignaling(signalingSessionIds)
 	}
+	const updateUsersChangedFromStandaloneSignaling = ([participants]) => {
+		const signalingStore = useSignalingStore()
+		signalingStore.updateParticipantsChangedFromStandaloneSignaling(token.value, participants)
+	}
+	const updateUsersCallDisconnectedFromStandaloneSignaling = () => {
+		const signalingStore = useSignalingStore()
+		signalingStore.updateParticipantsCallDisconnectedFromStandaloneSignaling(token.value)
+	}
 	/**
 	 * Stop the get participants listeners
 	 *
@@ -72,6 +82,8 @@ export function useGetParticipants(isActive = ref(true), isTopBar = true) {
 		EventBus.off('signaling-users-in-room', updateUsersFromInternalSignaling)
 		EventBus.off('signaling-users-joined', updateUsersJoinedFromStandaloneSignaling)
 		EventBus.off('signaling-users-left', updateUsersLeftFromStandaloneSignaling)
+		EventBus.off('signaling-users-changed', updateUsersChangedFromStandaloneSignaling)
+		EventBus.off('signaling-all-users-changed-in-call-to-disconnected', updateUsersCallDisconnectedFromStandaloneSignaling)
 		EventBus.off('signaling-participant-list-changed', debounceUpdateParticipants)
 		unsubscribe('guest-promoted', onJoinedConversation)
 	}
