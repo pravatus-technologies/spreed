@@ -126,4 +126,95 @@ describe('signalingStore', () => {
 
 		})
 	})
+
+	describe('standalone signaling', () => {
+		const participantsJoinedPayload = [
+			{ userid: 'user1', user: { displayname: 'User 1' }, sessionid: 'signaling-id-1', roomsessionid: 'session-id-1' },
+			{ userid: 'user2', user: { displayname: 'User 2' }, sessionid: 'signaling-id-2', roomsessionid: 'session-id-2' },
+			{ userid: 'user2', user: { displayname: 'User 2' }, sessionid: 'signaling-id-3', roomsessionid: 'session-id-3' },
+			{ userid: '', user: { displayname: 'Guest' }, sessionid: 'signaling-id-4', roomsessionid: 'session-id-4' },
+		]
+
+		it('should return a mapped object for a known session', () => {
+			// Arrange
+			populateParticipantsStore()
+
+			// Act
+			const unknownResults = signalingStore.updateParticipantsJoinedFromStandaloneSignaling(TOKEN, participantsJoinedPayload)
+
+			// Assert
+			expect(unknownResults).toBeFalsy()
+			expect(Object.keys(signalingStore.sessions)).toHaveLength(4)
+			expect(signalingStore.getSignalingSession('signaling-id-1'))
+				.toMatchObject({ token: TOKEN, attendeeId: 1, sessionId: 'session-id-1', signalingSessionId: 'signaling-id-1' })
+			expect(signalingStore.getSignalingSession('signaling-id-2'))
+				.toMatchObject({ token: TOKEN, attendeeId: 2, sessionId: 'session-id-2', signalingSessionId: 'signaling-id-2' })
+			expect(signalingStore.getSignalingSession('signaling-id-3'))
+				.toMatchObject({ token: TOKEN, attendeeId: 2, sessionId: 'session-id-3', signalingSessionId: 'signaling-id-3' })
+			expect(signalingStore.getSignalingSession('signaling-id-4'))
+				.toMatchObject({ token: TOKEN, attendeeId: 3, sessionId: 'session-id-4', signalingSessionId: 'signaling-id-4' })
+		})
+
+		it('should update participant objects for a known session on join', () => {
+			// Arrange
+			populateParticipantsStore()
+			jest.spyOn(vuexStore, 'commit')
+
+			// Act
+			signalingStore.updateParticipantsJoinedFromStandaloneSignaling(TOKEN, participantsJoinedPayload)
+
+			// Assert
+			expect(vuexStore.commit).toHaveBeenCalledTimes(3)
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(1, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 1, updatedData: { displayName: 'User 1', sessionIds: ['session-id-1'] } })
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(2, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 2, updatedData: { displayName: 'User 2', sessionIds: ['session-id-2', 'session-id-3'] } })
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(3, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 3, updatedData: { displayName: 'Guest', sessionIds: ['session-id-4'] } })
+		})
+
+		it('should handle unknown sessions', () => {
+			// Arrange
+			populateParticipantsStore()
+			const participantsPayload = [{ userid: 'user-unknown', user: { displayName: 'User Unknown' }, sessionid: 'signaling-id-unknown', roomsessionid: 'session-id-unknown' }]
+
+			// Act
+			const unknownResults = signalingStore.updateParticipantsJoinedFromStandaloneSignaling(TOKEN, participantsPayload)
+
+			// Assert
+			expect(unknownResults).toBeTruthy()
+			expect(Object.keys(signalingStore.sessions)).toHaveLength(1)
+			expect(signalingStore.getSignalingSession('signaling-id-unknown'))
+				.toMatchObject({ token: TOKEN, attendeeId: undefined, sessionId: 'session-id-unknown', signalingSessionId: 'signaling-id-unknown' })
+		})
+
+		it('should remove old sessions and update participant objects', () => {
+			// Arrange
+			populateParticipantsStore()
+			jest.spyOn(vuexStore, 'commit')
+			const participantsLeftPayload = [
+				'signaling-id-1',
+				'signaling-id-2',
+				'signaling-id-4',
+				'signaling-id-unknown',
+			]
+			signalingStore.updateParticipantsJoinedFromStandaloneSignaling(TOKEN, participantsJoinedPayload)
+			expect(Object.keys(signalingStore.sessions)).toHaveLength(4)
+
+			// Act
+			signalingStore.updateParticipantsLeftFromStandaloneSignaling(participantsLeftPayload)
+
+			// Assert
+			expect(Object.keys(signalingStore.sessions)).toHaveLength(1)
+			expect(signalingStore.getSignalingSession('session-id-1')).toBeUndefined()
+			expect(vuexStore.commit).toHaveBeenCalledTimes(6)
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(4, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 1, updatedData: { inCall: 0, sessionIds: [] } })
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(5, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 2, updatedData: { sessionIds: ['session-id-3'] } })
+			expect(vuexStore.commit).toHaveBeenNthCalledWith(6, 'updateParticipant',
+				{ token: TOKEN, attendeeId: 3, updatedData: { inCall: 0, sessionIds: [] } })
+
+		})
+	})
 })

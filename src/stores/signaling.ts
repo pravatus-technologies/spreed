@@ -30,6 +30,12 @@ type InternalUpdatePayload = Record<string, {
 	permissions: number,
 	sessionIds: string[],
 }>
+type StandaloneSignalingJoinPayload = {
+	userid: string,
+	user: { displayname: string },
+	sessionid: string, // Standalone signaling id
+	roomsessionid: string, // Nextcloud id
+}
 
 type State = {
 	sessions: Record<string, Session>,
@@ -133,6 +139,88 @@ export const useSignalingStore = defineStore('signaling', {
 			}
 
 			return hasUnknownSessions
+		},
+
+		/**
+		 * Update participants joined in store according to data from standalone signaling server
+		 *
+		 * @param token the conversation token;
+		 * @param participants the newly joined participant objects;
+		 * @return {boolean} whether list has unknown sessions mapped to attendees list
+		 */
+		updateParticipantsJoinedFromStandaloneSignaling(token: string, participants: StandaloneSignalingJoinPayload[]): boolean {
+			const attendeeUsers = store.getters.participantsList(token) as Participant[]
+			const attendeeUsersToUpdate: Record<string, { displayName?: string, sessionIds: string[] }> = {}
+			let hasUnknownSessions = false
+
+			for (const participant of participants) {
+				const attendeeId = this.getSignalingSession(participant.sessionid)?.attendeeId
+					?? attendeeUsers.find(attendee => {
+						return participant.userid
+							? attendee.actorType !== ATTENDEE.ACTOR_TYPE.GUESTS && attendee.actorId === participant.userid
+							: attendee.actorType === ATTENDEE.ACTOR_TYPE.GUESTS && attendee.sessionIds.includes(participant.roomsessionid)
+					})?.attendeeId
+
+				this.addSignalingSession({
+					attendeeId,
+					token,
+					signalingSessionId: participant.sessionid,
+					sessionId: participant.roomsessionid,
+				})
+
+				if (!attendeeId) {
+					hasUnknownSessions = true
+					continue
+				}
+
+				const attendee = store.getters.getParticipant(token, attendeeId)
+
+				if (!attendeeUsersToUpdate[attendeeId]) {
+					attendeeUsersToUpdate[attendeeId] = { sessionIds: [...attendee.sessionIds] }
+				}
+				if (participant.user.displayname) {
+					attendeeUsersToUpdate[attendeeId].displayName = participant.user.displayname
+				}
+				// Participant might join from several devices
+				if (!attendeeUsersToUpdate[attendeeId].sessionIds.includes(participant.roomsessionid)) {
+					attendeeUsersToUpdate[attendeeId].sessionIds.push(participant.roomsessionid)
+				}
+			}
+
+			for (const [attendeeId, updatedData] of Object.entries(attendeeUsersToUpdate)) {
+				store.commit('updateParticipant', {
+					token,
+					attendeeId: +attendeeId,
+					updatedData,
+				})
+			}
+
+			return hasUnknownSessions
+		},
+
+		/**
+		 * Update participants left in store according to data from standalone signaling server
+		 *
+		 * @param signalingSessionIds disconnected signaling sessions;
+		 */
+		updateParticipantsLeftFromStandaloneSignaling(signalingSessionIds: string[]) {
+			for (const signalingSessionId of signalingSessionIds) {
+				const session = this.getSignalingSession(signalingSessionId)
+				if (!session) {
+					continue
+				}
+				this.deleteSignalingSession(signalingSessionId)
+
+				const { token, attendeeId, sessionId } = session
+				const attendee = store.getters.getParticipant(token, attendeeId)
+				const updatedData : { sessionIds: [], inCall?: number } = {
+					sessionIds: attendee.sessionIds.filter((id: string) => id !== sessionId)
+				}
+				if (updatedData.sessionIds.length === 0) {
+					updatedData.inCall = PARTICIPANT.CALL_FLAG.DISCONNECTED
+				}
+				store.commit('updateParticipant', { token, attendeeId, updatedData })
+			}
 		},
 
 	},

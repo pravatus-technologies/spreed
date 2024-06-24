@@ -36,7 +36,8 @@ export function useGetParticipants(isActive = ref(true), isTopBar = true) {
 	function initialiseGetParticipants() {
 		EventBus.on('joined-conversation', onJoinedConversation)
 		EventBus.on('signaling-users-in-room', updateUsersFromInternalSignaling)
-
+		EventBus.on('signaling-users-joined', updateUsersJoinedFromStandaloneSignaling)
+		EventBus.on('signaling-users-left', updateUsersLeftFromStandaloneSignaling)
 		// FIXME this works only temporary until signaling is fixed to be only on the calls
 		// Then we have to search for another solution. Maybe the room list which we update
 		// periodically gets a hash of all online sessions?
@@ -51,7 +52,17 @@ export function useGetParticipants(isActive = ref(true), isTopBar = true) {
 			debounceUpdateParticipants()
 		}
 	}
-
+	const updateUsersJoinedFromStandaloneSignaling = async ([participants]) => {
+		const signalingStore = useSignalingStore()
+		const hasUnknownSessions = signalingStore.updateParticipantsJoinedFromStandaloneSignaling(token.value, participants)
+		if (hasUnknownSessions) {
+			debounceUpdateParticipants()
+		}
+	}
+	const updateUsersLeftFromStandaloneSignaling = ([signalingSessionIds]) => {
+		const signalingStore = useSignalingStore()
+		signalingStore.updateParticipantsLeftFromStandaloneSignaling(signalingSessionIds)
+	}
 	/**
 	 * Stop the get participants listeners
 	 *
@@ -59,6 +70,8 @@ export function useGetParticipants(isActive = ref(true), isTopBar = true) {
 	function stopGetParticipants() {
 		EventBus.off('joined-conversation', onJoinedConversation)
 		EventBus.off('signaling-users-in-room', updateUsersFromInternalSignaling)
+		EventBus.off('signaling-users-joined', updateUsersJoinedFromStandaloneSignaling)
+		EventBus.off('signaling-users-left', updateUsersLeftFromStandaloneSignaling)
 		EventBus.off('signaling-participant-list-changed', debounceUpdateParticipants)
 		unsubscribe('guest-promoted', onJoinedConversation)
 	}
