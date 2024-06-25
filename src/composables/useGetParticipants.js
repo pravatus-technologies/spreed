@@ -3,13 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import debounce from 'debounce'
-import { ref, nextTick, computed, watch, onBeforeUnmount, onMounted } from 'vue'
+import { ref, computed, watch, onBeforeUnmount, onMounted } from 'vue'
 
 import { subscribe, unsubscribe } from '@nextcloud/event-bus'
 
 import { useIsInCall } from './useIsInCall.js'
 import { useStore } from './useStore.js'
-import { CONVERSATION } from '../constants.js'
 import { EventBus } from '../services/EventBus.js'
 import { useSignalingStore } from '../stores/signaling.ts'
 
@@ -24,8 +23,7 @@ export function useGetParticipants(isActive = ref(true), isTopBar = true) {
 	const token = computed(() => store.getters.getToken())
 	const conversation = computed(() => store.getters.conversation(token.value))
 	const isInCall = useIsInCall()
-	const isOneToOneConversation = computed(() => conversation.value?.type === CONVERSATION.TYPE.ONE_TO_ONE
-		|| conversation.value?.type === CONVERSATION.TYPE.ONE_TO_ONE_FORMER)
+	const participantsInitialised = computed(() => store.getters.participantsInitialised(token.value))
 	let fetchingParticipants = false
 	let pendingChanges = true
 
@@ -43,7 +41,7 @@ export function useGetParticipants(isActive = ref(true), isTopBar = true) {
 		// FIXME this works only temporary until signaling is fixed to be only on the calls
 		// Then we have to search for another solution. Maybe the room list which we update
 		// periodically gets a hash of all online sessions?
-		EventBus.on('signaling-participant-list-changed', debounceUpdateParticipants)
+		EventBus.on('signaling-participant-list-changed', debouncePostponedUpdateParticipants)
 		subscribe('guest-promoted', onJoinedConversation)
 	}
 
@@ -84,34 +82,44 @@ export function useGetParticipants(isActive = ref(true), isTopBar = true) {
 		EventBus.off('signaling-users-left', updateUsersLeftFromStandaloneSignaling)
 		EventBus.off('signaling-users-changed', updateUsersChangedFromStandaloneSignaling)
 		EventBus.off('signaling-all-users-changed-in-call-to-disconnected', updateUsersCallDisconnectedFromStandaloneSignaling)
-		EventBus.off('signaling-participant-list-changed', debounceUpdateParticipants)
+		EventBus.off('signaling-participant-list-changed', debouncePostponedUpdateParticipants)
 		unsubscribe('guest-promoted', onJoinedConversation)
 	}
 
 	const onJoinedConversation = () => {
-		if (isOneToOneConversation.value) {
+		if (!participantsInitialised.value) {
 			cancelableGetParticipants()
 		} else {
-			nextTick(() => debounceUpdateParticipants())
+			debounceUpdateParticipants()
 		}
 	}
 
-	const debounceUpdateParticipants = () => {
+	const debouncePostponedUpdateParticipants = () => {
+		debounceUpdateParticipants(true)
+	}
+
+	const debounceUpdateParticipants = (postpone) => {
 		if (!isActive.value && !isInCall.value) {
 			// Update is ignored but there is a flag to force the participants update
 			pendingChanges = true
 			return
 		}
 
-		if (store.getters.windowIsVisible() && (isInCall.value || !conversation.value?.hasCall)) {
+		if (postpone) {
+			console.count('perf: debounceLongUpdateParticipants')
+			debounceLongUpdateParticipants()
+		} else if (store.getters.windowIsVisible() && (isInCall.value || !conversation.value?.hasCall)) {
+			console.count('perf: debounceFastUpdateParticipants')
 			debounceFastUpdateParticipants()
 		} else {
+			console.count('perf: debounceSlowUpdateParticipants')
 			debounceSlowUpdateParticipants()
 		}
 	    pendingChanges = false
 	}
 
 	const cancelableGetParticipants = async () => {
+		console.count('perf: cancelableGetParticipants')
 		const isInLobby = store.getters.isInLobby
 		const isModeratorOrUser = store.getters.isModeratorOrUser
 		if (fetchingParticipants || token.value === '' || isInLobby || !isModeratorOrUser) {
@@ -121,6 +129,7 @@ export function useGetParticipants(isActive = ref(true), isTopBar = true) {
 		fetchingParticipants = true
 		debounceFastUpdateParticipants.clear()
 		debounceSlowUpdateParticipants.clear()
+		debounceLongUpdateParticipants.clear()
 
 		await store.dispatch('fetchParticipants', { token: token.value })
 		fetchingParticipants = false
@@ -130,6 +139,8 @@ export function useGetParticipants(isActive = ref(true), isTopBar = true) {
 		cancelableGetParticipants, 3000)
 	const debounceSlowUpdateParticipants = debounce(
 		cancelableGetParticipants, 15000)
+	const debounceLongUpdateParticipants = debounce(
+		cancelableGetParticipants, 30000)
 
 	onMounted(() => {
 		if (isTopBar) {
