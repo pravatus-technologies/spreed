@@ -57,6 +57,9 @@ type StandaloneUpdatePayload = Record<string, {
 	displayName?: string,
 }>
 
+type FindSessionType = 'int-change' | 'ext-join' | 'ext-change'
+type FindSessionPayload = InternalSignalingPayload | StandaloneSignalingJoinPayload | StandaloneSignalingChangePayload
+
 type State = {
 	sessions: Record<string, Session>,
 }
@@ -84,6 +87,53 @@ export const useSignalingStore = defineStore('signaling', {
 			}
 		},
 
+		findSignalingSession(token: string, type: FindSessionType, payload: FindSessionPayload) {
+			// Unify payload from different methods
+			let signalingSessionId: string | undefined
+			let userId: string | undefined
+			let sessionId: string | undefined
+			switch (type) {
+			case 'ext-join': {
+				signalingSessionId = (payload as StandaloneSignalingJoinPayload).sessionid
+				userId = (payload as StandaloneSignalingJoinPayload).userid
+				sessionId = (payload as StandaloneSignalingJoinPayload).roomsessionid
+				break
+			}
+			case 'int-change': {
+				signalingSessionId = (payload as InternalSignalingPayload).sessionId
+				userId = (payload as InternalSignalingPayload).userId
+				sessionId = (payload as InternalSignalingPayload).sessionId
+				break
+			}
+			case 'ext-change': {
+				signalingSessionId = (payload as StandaloneSignalingChangePayload).sessionId
+				userId = (payload as StandaloneSignalingChangePayload).userId
+				sessionId = (payload as StandaloneSignalingChangePayload).nextcloudSessionId
+				break
+			}
+			}
+
+			// Look for existing session by signaling id
+			const knownSession: Session | undefined = this.getSignalingSession(signalingSessionId)
+			if (knownSession) {
+				return knownSession
+			}
+
+			// Attempt to find attendee by userId or guest sessionIds
+			if (signalingSessionId) {
+				const attendee = (store.getters.participantsList(token) as Participant[]).find(attendee => {
+					return attendee.actorType !== ATTENDEE.ACTOR_TYPE.GUESTS
+						? userId && attendee.actorId === userId
+						: sessionId && attendee.sessionIds.includes(sessionId)
+				})
+
+				const newSession: Session = { attendeeId: attendee?.attendeeId, token, signalingSessionId, sessionId }
+				this.addSignalingSession(newSession)
+
+				return newSession
+			}
+		},
+
 		/**
 		 * Update participants in store according to data from internal signaling server
 		 *
@@ -98,21 +148,9 @@ export const useSignalingStore = defineStore('signaling', {
 			let hasUnknownSessions = false
 
 			for (const participant of participants) {
-				// Look through existing sessions or find attendee by userId or guest sessionIds
-				const attendeeId: number | undefined = this.getSignalingSession(participant.sessionId)?.attendeeId
-					?? attendeeUsers.find(attendee => {
-						return participant.userId
-							? attendee.actorType !== ATTENDEE.ACTOR_TYPE.GUESTS && attendee.actorId === participant.userId
-							: attendee.actorType === ATTENDEE.ACTOR_TYPE.GUESTS && attendee.sessionIds.includes(participant.sessionId)
-					})?.attendeeId
-
-				this.addSignalingSession({
-					attendeeId,
-					token,
-					signalingSessionId: participant.sessionId,
-					sessionId: participant.sessionId,
-				})
 				newSessions.add(participant.sessionId)
+				const session = this.findSignalingSession(token, 'int-change', participant)
+				const attendeeId = session?.attendeeId
 				if (!attendeeId) {
 					hasUnknownSessions = true
 					continue
@@ -174,19 +212,8 @@ export const useSignalingStore = defineStore('signaling', {
 			let hasUnknownSessions = false
 
 			for (const participant of participants) {
-				const attendeeId = this.getSignalingSession(participant.sessionid)?.attendeeId
-					?? attendeeUsers.find(attendee => {
-						return participant.userid
-							? attendee.actorType !== ATTENDEE.ACTOR_TYPE.GUESTS && attendee.actorId === participant.userid
-							: attendee.actorType === ATTENDEE.ACTOR_TYPE.GUESTS && attendee.sessionIds.includes(participant.roomsessionid)
-					})?.attendeeId
-
-				this.addSignalingSession({
-					attendeeId,
-					token,
-					signalingSessionId: participant.sessionid,
-					sessionId: participant.roomsessionid,
-				})
+				const session = this.findSignalingSession(token, 'ext-join', participant)
+				const attendeeId = session?.attendeeId
 
 				if (!attendeeId) {
 					hasUnknownSessions = true
@@ -254,11 +281,11 @@ export const useSignalingStore = defineStore('signaling', {
 			const attendeeUsersToUpdate: StandaloneUpdatePayload = {}
 
 			for (const participant of participants) {
-				const session = this.getSignalingSession(participant.sessionId)
-				if (!session?.attendeeId) {
+				const session = this.findSignalingSession(token, 'ext-change', participant)
+				const attendeeId = session?.attendeeId
+				if (!attendeeId) {
 					continue
 				}
-				const { token, attendeeId } = session
 
 				if (!attendeeUsersToUpdate[attendeeId]) {
 					attendeeUsersToUpdate[attendeeId] = {
