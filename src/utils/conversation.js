@@ -31,6 +31,16 @@ export function hasUnreadMentions(conversation) {
 }
 
 /**
+ * check if the conversation has ongoing call
+ *
+ * @param {object} conversation conversation object
+ * @return {boolean}
+ */
+export function hasCall(conversation) {
+	return conversation.hasCall && (!isArchived(conversation) || conversation.notificationCalls === PARTICIPANT.NOTIFY_CALLS.ON)
+}
+
+/**
  * check if the conversation is archived
  *
  * @param {object} conversation conversation object

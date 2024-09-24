@@ -372,7 +372,7 @@ import { talkBroadcastChannel } from '../../services/talkBroadcastChannel.js'
 import { useFederationStore } from '../../stores/federation.ts'
 import { useTalkHashStore } from '../../stores/talkHash.js'
 import CancelableRequest from '../../utils/cancelableRequest.js'
-import { hasUnreadMentions, filterFunction } from '../../utils/conversation.js'
+import { hasUnreadMentions, hasCall, filterFunction } from '../../utils/conversation.js'
 import { requestTabLeadership } from '../../utils/requestTabLeadership.js'
 
 const isFederationEnabled = getTalkConfig('local', 'federation', 'enabled')
@@ -551,7 +551,7 @@ export default {
 					validConversationsCount++
 				}
 				return conversationIsValid
-					|| conversation.hasCall
+					|| hasCall(conversation)
 					|| conversation.token === this.token
 			})
 			// return empty if it only includes the current conversation without any flags
