@@ -367,7 +367,7 @@ export default {
 		},
 
 		showCallLayoutSwitch() {
-			return !this.$store.getters.isEmptyCallView
+			return !this.callViewStore.isEmptyCallView
 		},
 	},
 

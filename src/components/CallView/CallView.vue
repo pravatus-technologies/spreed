@@ -446,7 +446,7 @@ export default {
 		},
 
 		showEmptyCallView(value) {
-			this.$store.dispatch('isEmptyCallView', value)
+			this.callViewStore.setIsEmptyCallView(value)
 		},
 	},
 
@@ -467,7 +467,7 @@ export default {
 
 	beforeDestroy() {
 		this.debounceFetchPeers.clear?.()
-		this.$store.dispatch('isEmptyCallView', true)
+		this.callViewStore.setIsEmptyCallView(true)
 		EventBus.off('refresh-peer-list', this.debounceFetchPeers)
 
 		callParticipantCollection.off('remove', this._lowerHandWhenParticipantLeaves)

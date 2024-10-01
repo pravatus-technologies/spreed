@@ -27,7 +27,6 @@ export const useCallViewStore = defineStore('callView', {
 	}),
 
 	getters: {
-		isEmptyCallView: (state) => state.isEmptyCallView,
 		lastIsGrid: (state) => state.lastIsGrid,
 		lastIsStripeOpen: (state) => state.lastIsStripeOpen,
 		presentationStarted: (state) => state.presentationStarted,
@@ -56,9 +55,6 @@ export const useCallViewStore = defineStore('callView', {
 
 	actions: {
 		// Mutations
-		isEmptyCallView(state, value) {
-			state.isEmptyCallView = value
-		},
 		lastIsGrid(state, value) {
 			state.lastIsGrid = value
 		},
@@ -223,8 +219,8 @@ export const useCallViewStore = defineStore('callView', {
 			context.commit('setQualityWarningTooltipDismissed', { qualityWarningTooltipDismissed: true })
 		},
 
-		isEmptyCallView(context, value) {
-			context.commit('isEmptyCallView', value)
+		setIsEmptyCallView(value) {
+			this.isEmptyCallView = value
 		},
 
 		setCallHasJustEnded(context, timestamp) {
