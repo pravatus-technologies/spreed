@@ -7,6 +7,7 @@ import { defineStore } from 'pinia'
 
 import { CONVERSATION } from '../constants.js'
 import BrowserStorage from '../services/BrowserStorage.js'
+import store from '../store/index.js'
 
 export const useCallViewStore = defineStore('callView', {
 	state: () => ({
@@ -41,17 +42,12 @@ export const useCallViewStore = defineStore('callView', {
 			this.selectedVideoPeerId = value
 		},
 
-		joinCall(context, { token }) {
-			let isGrid = BrowserStorage.getItem('callprefs-' + token + '-isgrid')
-			if (isGrid === null) {
-				const conversationType = context.getters.conversations[token].type
-				// default to grid view for group/public calls, otherwise speaker view
-				isGrid = (conversationType === CONVERSATION.TYPE.GROUP
-					|| conversationType === CONVERSATION.TYPE.PUBLIC)
-			} else {
-				// BrowserStorage.getItem returns a string instead of a boolean
-				isGrid = (isGrid === 'true')
-			}
+		handleJoinCall({ token }) {
+			const gridPreference = BrowserStorage.getItem(`callprefs-${token}-isgrid`)
+			const isGrid = gridPreference === null
+				// not defined yet, default to grid view for group/public calls, otherwise speaker view
+				? [CONVERSATION.TYPE.GROUP, CONVERSATION.TYPE.PUBLIC].includes(store.getters.conversations[token].type)
+				: gridPreference === 'true'
 			context.dispatch('setCallViewMode', { isGrid, isStripeOpen: true })
 		},
 
