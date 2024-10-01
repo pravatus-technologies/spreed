@@ -27,7 +27,6 @@ export const useCallViewStore = defineStore('callView', {
 	}),
 
 	getters: {
-		isStripeOpen: (state) => state.isStripeOpen,
 		isEmptyCallView: (state) => state.isEmptyCallView,
 		lastIsGrid: (state) => state.lastIsGrid,
 		lastIsStripeOpen: (state) => state.lastIsStripeOpen,
@@ -57,9 +56,6 @@ export const useCallViewStore = defineStore('callView', {
 
 	actions: {
 		// Mutations
-		isStripeOpen(state, value) {
-			state.isStripeOpen = value
-		},
 		isEmptyCallView(state, value) {
 			state.isEmptyCallView = value
 		},
@@ -160,8 +156,8 @@ export const useCallViewStore = defineStore('callView', {
 			}
 
 			if (isStripeOpen !== null) {
-				context.commit('lastIsStripeOpen', context.getters.isStripeOpen)
-				context.commit('isStripeOpen', isStripeOpen)
+				context.commit('lastIsStripeOpen', this.isStripeOpen)
+				this.isStripeOpen = isStripeOpen
 			}
 		},
 
@@ -211,7 +207,7 @@ export const useCallViewStore = defineStore('callView', {
 			if (!context.getters.presentationStarted) {
 				return
 			}
-			if (!this.isGrid && !context.getters.isStripeOpen) {
+			if (!this.isGrid && !this.isStripeOpen) {
 				// User didn't pick grid view during presentation
 				// restore previous state
 				context.dispatch('setCallViewMode', {
