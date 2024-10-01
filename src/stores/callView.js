@@ -27,7 +27,6 @@ export const useCallViewStore = defineStore('callView', {
 	}),
 
 	getters: {
-		forceCallView: (state) => state.forceCallView,
 		isViewerOverlay: (state) => state.isViewerOverlay,
 		isGrid: (state) => state.isGrid,
 		isStripeOpen: (state) => state.isStripeOpen,
@@ -60,9 +59,6 @@ export const useCallViewStore = defineStore('callView', {
 
 	actions: {
 		// Mutations
-		setForceCallView(state, value) {
-			state.forceCallView = value
-		},
 		isViewerOverlay(state, value) {
 			state.isViewerOverlay = value
 		},
@@ -114,8 +110,8 @@ export const useCallViewStore = defineStore('callView', {
 		},
 
 		// Actions
-		setForceCallView(context, value) {
-			context.commit('setForceCallView', value)
+		setForceCallView(value) {
+			this.forceCallView = value
 		},
 
 		selectedVideoPeerId(context, value) {
