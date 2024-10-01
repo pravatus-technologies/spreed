@@ -28,14 +28,16 @@ export const useCallViewStore = defineStore('callView', {
 	},
 
 	actions: {
-		// Mutations
-		// Actions
 		setForceCallView(value) {
 			this.forceCallView = value
 		},
 
 		setIsViewerOverlay(value) {
 			this.isViewerOverlay = value
+		},
+
+		setIsEmptyCallView(value) {
+			this.isEmptyCallView = value
 		},
 
 		setSelectedVideoPeerId(value) {
@@ -83,53 +85,33 @@ export const useCallViewStore = defineStore('callView', {
 		 *
 		 * Switches off grid mode and closes the stripe.
 		 * Remembers the call view state for after the end of the presentation.
-		 *
-		 * @param {object} context default store context;
 		 */
-		startPresentation(context) {
-			// don't start twice, this would prevent multiple
-			// screen shares to clear the last call view state
+		startPresentation() {
+			// don't start twice, this would prevent multiple screen shares to clear the last call view state
 			if (this.presentationStarted) {
 				return
 			}
-
 			this.presentationStarted = true
-			// switch off grid mode during presentation and collapse
-			// the stripe to focus on the screen share, but continue remembering
-			// the last state
-			this.setCallViewMode({
-				isGrid: false,
-				isStripeOpen: false,
-				clearLast: false,
-			})
+
+			this.setCallViewMode({ isGrid: false, isStripeOpen: false, clearLast: false })
 		},
 
 		/**
 		 * Stops presentation mode.
 		 *
-		 * Restores call view state from before starting the presentation, given
-		 * that the last state was not cleared manually.
-		 *
-		 * @param {object} context default store context;
+		 * Restores call view state from before starting the presentation,
+		 * given that the last state was not cleared manually.
 		 */
-		stopPresentation(context) {
+		stopPresentation() {
 			if (!this.presentationStarted) {
 				return
 			}
-			if (!this.isGrid && !this.isStripeOpen) {
-				// User didn't pick grid view during presentation
-				// restore previous state
-				this.setCallViewMode({
-					isGrid: this.lastIsGrid,
-					isStripeOpen: this.lastIsStripeOpen,
-					clearLast: false,
-				})
-			}
 			this.presentationStarted = false
-		},
 
-		setIsEmptyCallView(value) {
-			this.isEmptyCallView = value
+			if (!this.isGrid && !this.isStripeOpen) {
+				// User didn't pick grid view during presentation, restore previous state
+				this.setCallViewMode({ isGrid: this.lastIsGrid, isStripeOpen: this.lastIsStripeOpen, clearLast: false })
+			}
 		},
 
 		/**
