@@ -649,7 +649,7 @@ export default {
 			}
 
 			if (this.callViewStore.presentationStarted) {
-				this.$store.dispatch('setCallViewMode', {
+				this.callViewStore.setCallViewMode({
 					isGrid: false,
 					isStripeOpen: false,
 					clearLast: false,

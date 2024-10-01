@@ -48,20 +48,19 @@ export const useCallViewStore = defineStore('callView', {
 				// not defined yet, default to grid view for group/public calls, otherwise speaker view
 				? [CONVERSATION.TYPE.GROUP, CONVERSATION.TYPE.PUBLIC].includes(store.getters.conversations[token].type)
 				: gridPreference === 'true'
-			context.dispatch('setCallViewMode', { isGrid, isStripeOpen: true })
+			this.setCallViewMode({ isGrid, isStripeOpen: true })
 		},
 
 		/**
 		 * Sets the current call view mode and saves it in preferences.
 		 * If clearLast is false, also remembers it in separate properties.
 		 *
-		 * @param {object} context default store context;
 		 * @param {object} data the wrapping object;
 		 * @param {boolean|null} [data.isGrid=null] true for enabled grid mode, false for speaker view;
 		 * @param {boolean|null} [data.isStripeOpen=null] true for visible striped mode, false for speaker view;
 		 * @param {boolean} [data.clearLast=true] set false to not reset last temporary remembered state;
 		 */
-		setCallViewMode(context, { isGrid = null, isStripeOpen = null, clearLast = true }) {
+		setCallViewMode({ isGrid = null, isStripeOpen = null, clearLast = true }) {
 			if (clearLast) {
 				this.lastIsGrid = null
 				this.lastIsStripeOpen = null
@@ -69,7 +68,7 @@ export const useCallViewStore = defineStore('callView', {
 
 			if (isGrid !== null) {
 				this.lastIsGrid = this.isGrid
-				BrowserStorage.setItem('callprefs-' + context.getters.getToken() + '-isgrid', isGrid)
+				BrowserStorage.setItem(`callprefs-${store.getters.getToken()}-isgrid`, isGrid)
 				this.isGrid = isGrid
 			}
 
@@ -98,7 +97,7 @@ export const useCallViewStore = defineStore('callView', {
 			// switch off grid mode during presentation and collapse
 			// the stripe to focus on the screen share, but continue remembering
 			// the last state
-			context.dispatch('setCallViewMode', {
+			this.setCallViewMode({
 				isGrid: false,
 				isStripeOpen: false,
 				clearLast: false,
@@ -120,7 +119,7 @@ export const useCallViewStore = defineStore('callView', {
 			if (!this.isGrid && !this.isStripeOpen) {
 				// User didn't pick grid view during presentation
 				// restore previous state
-				context.dispatch('setCallViewMode', {
+				this.setCallViewMode({
 					isGrid: this.lastIsGrid,
 					isStripeOpen: this.lastIsStripeOpen,
 					clearLast: false,
