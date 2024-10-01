@@ -30,15 +30,6 @@
 				<p v-if="recordingConsentRequired">
 					{{ t('spreed', 'The consent to be recorded will be required for each participant before joining every call.') }}
 				</p>
-				<NcCheckboxRadioSwitch v-if="supportsArchive"
-					type="switch"
-					:checked="isArchived"
-					@update:checked="toggleArchiveConversation">
-					{{ t('spreed', 'Archive conversation') }}
-				</NcCheckboxRadioSwitch>
-				<p>
-					{{ t('spreed', 'Archived conversations are hidden from the list. They will still be shown, if you have been mentioned directly.') }}
-				</p>
 				<NotificationsSettings v-if="!isGuest" :conversation="conversation" />
 			</NcAppSettingsSection>
 
@@ -93,6 +84,18 @@
 				id="dangerzone"
 				:name="t('spreed', 'Danger zone')">
 				<LockingSettings v-if="canFullModerate && !isNoteToSelf" :token="token" />
+				<h4 class="app-settings-section__subtitle">
+					{{ t('spreed', 'Archive conversation') }}
+				</h4>
+				<NcCheckboxRadioSwitch v-if="supportsArchive"
+					type="switch"
+					:checked="isArchived"
+					@update:checked="toggleArchiveConversation">
+					{{ t('spreed', 'Archive conversation') }}
+				</NcCheckboxRadioSwitch>
+				<p class="app-settings-section__hint">
+					{{ t('spreed', 'Archived conversations are hidden from the conversation list by default. They will still be shown, if you have been mentioned directly, when you search for the conversation name or filter your conversation list for archived conversations.') }}
+				</p>
 				<DangerZone :conversation="conversation"
 					:can-leave-conversation="canLeaveConversation"
 					:can-delete-conversation="canDeleteConversation" />
