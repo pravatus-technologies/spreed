@@ -154,6 +154,7 @@ import { SIMULCAST } from '../../constants.js'
 import { fetchPeers } from '../../services/callsService.js'
 import { getTalkConfig } from '../../services/CapabilitiesManager.ts'
 import { EventBus } from '../../services/EventBus.js'
+import { useCallViewStore } from '../../stores/callView.js'
 import { localMediaModel, localCallParticipantModel, callParticipantCollection } from '../../utils/webrtc/index.js'
 import RemoteVideoBlocker from '../../utils/webrtc/RemoteVideoBlocker.js'
 
@@ -201,6 +202,7 @@ export default {
 			localCallParticipantModel,
 			callParticipantCollection,
 			devMode,
+			callViewStore: useCallViewStore(),
 		}
 	},
 
@@ -243,7 +245,7 @@ export default {
 		},
 
 		isViewerOverlay() {
-			return this.$store.getters.isViewerOverlay
+			return this.callViewStore.isViewerOverlay
 		},
 
 		isGrid() {

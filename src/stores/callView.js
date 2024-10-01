@@ -27,7 +27,6 @@ export const useCallViewStore = defineStore('callView', {
 	}),
 
 	getters: {
-		isViewerOverlay: (state) => state.isViewerOverlay,
 		isGrid: (state) => state.isGrid,
 		isStripeOpen: (state) => state.isStripeOpen,
 		isEmptyCallView: (state) => state.isEmptyCallView,
@@ -59,9 +58,6 @@ export const useCallViewStore = defineStore('callView', {
 
 	actions: {
 		// Mutations
-		isViewerOverlay(state, value) {
-			state.isViewerOverlay = value
-		},
 		isGrid(state, value) {
 			state.isGrid = value
 		},
@@ -114,6 +110,10 @@ export const useCallViewStore = defineStore('callView', {
 			this.forceCallView = value
 		},
 
+		setIsViewerOverlay(value) {
+			this.isViewerOverlay = value
+		},
+
 		selectedVideoPeerId(context, value) {
 			context.commit('selectedVideoPeerId', value)
 		},
@@ -147,17 +147,11 @@ export const useCallViewStore = defineStore('callView', {
 		 *
 		 * @param {object} context default store context;
 		 * @param {object} data the wrapping object;
-		 * @param {boolean|null} [data.isViewerOverlay=null] true viewer overlay mode;
 		 * @param {boolean|null} [data.isGrid=null] true for enabled grid mode, false for speaker view;
 		 * @param {boolean|null} [data.isStripeOpen=null] true for visible striped mode, false for speaker view;
 		 * @param {boolean} [data.clearLast=true] set false to not reset last temporary remembered state;
 		 */
-		setCallViewMode(context, { isGrid = null, isStripeOpen = null, isViewerOverlay = null, clearLast = true }) {
-			if (isViewerOverlay !== null) {
-				context.commit('isViewerOverlay', isViewerOverlay)
-				return
-			}
-
+		setCallViewMode(context, { isGrid = null, isStripeOpen = null, clearLast = true }) {
 			if (clearLast) {
 				context.commit('lastIsGrid', null)
 				context.commit('lastIsStripeOpen', null)
