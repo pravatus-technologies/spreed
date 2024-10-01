@@ -20,7 +20,6 @@ export const useCallViewStore = defineStore('callView', {
 		lastIsStripeOpen: null,
 		presentationStarted: false,
 		selectedVideoPeerId: null,
-		qualityWarningTooltipDismissed: false,
 		callEndedTimeout: null,
 		participantRaisedHands: {},
 		backgroundImageAverageColorCache: {},
@@ -28,7 +27,6 @@ export const useCallViewStore = defineStore('callView', {
 
 	getters: {
 		callHasJustEnded: (state) => !!state.callEndedTimeout,
-		isQualityWarningTooltipDismissed: (state) => state.qualityWarningTooltipDismissed,
 		participantRaisedHandList: (state) => {
 			return state.participantRaisedHands
 		},
@@ -49,9 +47,6 @@ export const useCallViewStore = defineStore('callView', {
 
 	actions: {
 		// Mutations
-		setQualityWarningTooltipDismissed(state, { qualityWarningTooltipDismissed }) {
-			state.qualityWarningTooltipDismissed = qualityWarningTooltipDismissed
-		},
 		setParticipantHandRaised(state, { sessionId, raisedHand }) {
 			if (!sessionId) {
 				throw new Error('Missing or empty sessionId argument in call to setParticipantHandRaised')
@@ -97,8 +92,6 @@ export const useCallViewStore = defineStore('callView', {
 				isGrid = (isGrid === 'true')
 			}
 			context.dispatch('setCallViewMode', { isGrid, isStripeOpen: true })
-
-			context.commit('setQualityWarningTooltipDismissed', { qualityWarningTooltipDismissed: false })
 		},
 
 		leaveCall(context) {
@@ -192,10 +185,6 @@ export const useCallViewStore = defineStore('callView', {
 				})
 			}
 			this.presentationStarted = false
-		},
-
-		dismissQualityWarningTooltip(context) {
-			context.commit('setQualityWarningTooltipDismissed', { qualityWarningTooltipDismissed: true })
 		},
 
 		setIsEmptyCallView(value) {
