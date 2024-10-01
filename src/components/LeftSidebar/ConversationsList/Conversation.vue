@@ -110,8 +110,13 @@
 		<template v-if="isLeaveDialogOpen || isDeleteDialogOpen" #extra>
 			<NcDialog v-if="isLeaveDialogOpen"
 				:open.sync="isLeaveDialogOpen"
-				:name="t('spreed', 'Leave conversation')"
-				:message="dialogLeaveMessage">
+				:name="t('spreed', 'Leave conversation')">
+				<template #default>
+					<p>{{ dialogLeaveMessage }}</p>
+					<p v-if="supportsArchive && !item.isArchived">
+						{{ t('spreed', 'You can archive this conversation instead.') }}
+					</p>
+				</template>
 				<template #actions>
 					<NcButton v-if="supportsArchive && !item.isArchived" type="secondary" @click="toggleArchiveConversation">
 						{{ t('spreed', 'Archive instead') }}

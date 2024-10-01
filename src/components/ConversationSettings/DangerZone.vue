@@ -11,7 +11,7 @@
 				<h4 class="app-settings-section__subtitle">
 					{{ t('spreed', 'Leave conversation') }}
 				</h4>
-				<p class="danger-zone__hint">
+				<p class="app-settings-section__hint">
 					{{ t('spreed', 'Once a conversation is left, to rejoin a closed conversation, an invite is needed. An open conversation can be rejoined at any time.') }}
 				</p>
 				<NcButton type="warning" @click="toggleShowLeaveConversationDialog">
@@ -20,11 +20,16 @@
 				<NcDialog class="danger-zone__dialog"
 					:open.sync="isLeaveConversationDialogOpen"
 					:name="t('spreed','Leave conversation')"
-					:message="leaveConversationDialogMessage"
 					container=".danger-zone">
+					<template #default>
+						<p>{{ leaveConversationDialogMessage }}</p>
+						<p v-if="supportsArchive && !conversation.isArchived">
+							{{ t('spreed', 'You can archive this conversation instead.') }}
+						</p>
+					</template>
 					<template #actions>
 						<NcButton v-if="supportsArchive && !conversation.isArchived" type="secondary" @click="toggleArchiveConversation">
-							{{ t('spreed', 'Archive instead') }}
+							{{ t('spreed', 'Archive conversation') }}
 						</NcButton>
 						<NcButton type="tertiary" @click="toggleShowLeaveConversationDialog">
 							{{ t('spreed', 'No') }}
@@ -39,7 +44,7 @@
 				<h4 class="app-settings-section__subtitle">
 					{{ t('spreed', 'Delete conversation') }}
 				</h4>
-				<p class="danger-zone__hint">
+				<p class="app-settings-section__hint">
 					{{ t('spreed', 'Permanently delete this conversation.') }}
 				</p>
 				<NcButton type="error"
@@ -65,7 +70,7 @@
 				<h4 class="app-settings-section__subtitle">
 					{{ t('spreed', 'Delete chat messages') }}
 				</h4>
-				<p class="danger-zone__hint">
+				<p class="app-settings-section__hint">
 					{{ t('spreed', 'Permanently delete all the messages in this conversation.') }}
 				</p>
 				<NcButton type="error"
@@ -268,9 +273,6 @@ h4 {
 }
 
 .danger-zone {
-	&__hint {
-		color: var(--color-text-maxcontrast);
-	}
 	&__dialog {
 		:deep(.modal-container) {
 			padding-block: 4px 8px;
