@@ -21,25 +21,12 @@ export const useCallViewStore = defineStore('callView', {
 		presentationStarted: false,
 		selectedVideoPeerId: null,
 		callEndedTimeout: null,
-		participantRaisedHands: {},
 		backgroundImageAverageColorCache: {},
 	}),
 
 	getters: {
 		callHasJustEnded: (state) => !!state.callEndedTimeout,
-		participantRaisedHandList: (state) => {
-			return state.participantRaisedHands
-		},
-		getParticipantRaisedHand: (state) => (sessionIds) => {
-			for (let i = 0; i < sessionIds.length; i++) {
-				if (state.participantRaisedHands[sessionIds[i]]) {
-					// note: only the raised states are stored, so no need to confirm
-					return state.participantRaisedHands[sessionIds[i]]
-				}
-			}
 
-			return { state: false, timestamp: null }
-		},
 		getCachedBackgroundImageAverageColor: (state) => (videoBackgroundId) => {
 			return state.backgroundImageAverageColorCache[videoBackgroundId]
 		},
@@ -47,19 +34,6 @@ export const useCallViewStore = defineStore('callView', {
 
 	actions: {
 		// Mutations
-		setParticipantHandRaised(state, { sessionId, raisedHand }) {
-			if (!sessionId) {
-				throw new Error('Missing or empty sessionId argument in call to setParticipantHandRaised')
-			}
-			if (raisedHand && raisedHand.state) {
-				Vue.set(state.participantRaisedHands, sessionId, raisedHand)
-			} else {
-				Vue.delete(state.participantRaisedHands, sessionId)
-			}
-		},
-		clearParticipantHandRaised(state) {
-			state.participantRaisedHands = {}
-		},
 		setCachedBackgroundImageAverageColor(state, { videoBackgroundId, backgroundImageAverageColor }) {
 			Vue.set(state.backgroundImageAverageColorCache, videoBackgroundId, backgroundImageAverageColor)
 		},
@@ -95,9 +69,6 @@ export const useCallViewStore = defineStore('callView', {
 		},
 
 		leaveCall(context) {
-			// clear raised hands as they were specific to the call
-			context.commit('clearParticipantHandRaised')
-
 			context.commit('clearBackgroundImageAverageColorCache')
 		},
 
@@ -127,10 +98,6 @@ export const useCallViewStore = defineStore('callView', {
 				this.lastIsStripeOpen = this.isStripeOpen
 				this.isStripeOpen = isStripeOpen
 			}
-		},
-
-		setParticipantHandRaised(context, { sessionId, raisedHand }) {
-			context.commit('setParticipantHandRaised', { sessionId, raisedHand })
 		},
 
 		setCachedBackgroundImageAverageColor(context, { videoBackgroundId, backgroundImageAverageColor }) {
