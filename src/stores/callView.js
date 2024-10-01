@@ -4,7 +4,6 @@
  */
 
 import { defineStore } from 'pinia'
-import Vue from 'vue'
 
 import { CONVERSATION } from '../constants.js'
 import BrowserStorage from '../services/BrowserStorage.js'
@@ -21,26 +20,14 @@ export const useCallViewStore = defineStore('callView', {
 		presentationStarted: false,
 		selectedVideoPeerId: null,
 		callEndedTimeout: null,
-		backgroundImageAverageColorCache: {},
 	}),
 
 	getters: {
 		callHasJustEnded: (state) => !!state.callEndedTimeout,
-
-		getCachedBackgroundImageAverageColor: (state) => (videoBackgroundId) => {
-			return state.backgroundImageAverageColorCache[videoBackgroundId]
-		},
 	},
 
 	actions: {
 		// Mutations
-		setCachedBackgroundImageAverageColor(state, { videoBackgroundId, backgroundImageAverageColor }) {
-			Vue.set(state.backgroundImageAverageColorCache, videoBackgroundId, backgroundImageAverageColor)
-		},
-		clearBackgroundImageAverageColorCache(state) {
-			state.backgroundImageAverageColorCache = {}
-		},
-
 		// Actions
 		setForceCallView(value) {
 			this.forceCallView = value
@@ -66,10 +53,6 @@ export const useCallViewStore = defineStore('callView', {
 				isGrid = (isGrid === 'true')
 			}
 			context.dispatch('setCallViewMode', { isGrid, isStripeOpen: true })
-		},
-
-		leaveCall(context) {
-			context.commit('clearBackgroundImageAverageColorCache')
 		},
 
 		/**
@@ -98,10 +81,6 @@ export const useCallViewStore = defineStore('callView', {
 				this.lastIsStripeOpen = this.isStripeOpen
 				this.isStripeOpen = isStripeOpen
 			}
-		},
-
-		setCachedBackgroundImageAverageColor(context, { videoBackgroundId, backgroundImageAverageColor }) {
-			context.commit('setCachedBackgroundImageAverageColor', { videoBackgroundId, backgroundImageAverageColor })
 		},
 
 		/**
