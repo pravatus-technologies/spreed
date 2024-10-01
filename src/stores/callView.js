@@ -27,8 +27,6 @@ export const useCallViewStore = defineStore('callView', {
 	}),
 
 	getters: {
-		lastIsGrid: (state) => state.lastIsGrid,
-		lastIsStripeOpen: (state) => state.lastIsStripeOpen,
 		presentationStarted: (state) => state.presentationStarted,
 		callHasJustEnded: (state) => !!state.callHasJustEnded,
 		selectedVideoPeerId: (state) => {
@@ -55,12 +53,6 @@ export const useCallViewStore = defineStore('callView', {
 
 	actions: {
 		// Mutations
-		lastIsGrid(state, value) {
-			state.lastIsGrid = value
-		},
-		lastIsStripeOpen(state, value) {
-			state.lastIsStripeOpen = value
-		},
 		selectedVideoPeerId(state, value) {
 			state.selectedVideoPeerId = value
 		},
@@ -141,18 +133,18 @@ export const useCallViewStore = defineStore('callView', {
 		 */
 		setCallViewMode(context, { isGrid = null, isStripeOpen = null, clearLast = true }) {
 			if (clearLast) {
-				context.commit('lastIsGrid', null)
-				context.commit('lastIsStripeOpen', null)
+				this.lastIsGrid = null
+				this.lastIsStripeOpen = null
 			}
 
 			if (isGrid !== null) {
-				context.commit('lastIsGrid', this.isGrid)
+				this.lastIsGrid = this.isGrid
 				BrowserStorage.setItem('callprefs-' + context.getters.getToken() + '-isgrid', isGrid)
 				this.isGrid = isGrid
 			}
 
 			if (isStripeOpen !== null) {
-				context.commit('lastIsStripeOpen', this.isStripeOpen)
+				this.lastIsStripeOpen = this.isStripeOpen
 				this.isStripeOpen = isStripeOpen
 			}
 		},
@@ -207,8 +199,8 @@ export const useCallViewStore = defineStore('callView', {
 				// User didn't pick grid view during presentation
 				// restore previous state
 				context.dispatch('setCallViewMode', {
-					isGrid: context.getters.lastIsGrid,
-					isStripeOpen: context.getters.lastIsStripeOpen,
+					isGrid: this.lastIsGrid,
+					isStripeOpen: this.lastIsStripeOpen,
 					clearLast: false,
 				})
 			}
