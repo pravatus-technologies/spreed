@@ -242,7 +242,7 @@ export default {
 
 		startCallButtonDisabled() {
 			return this.disabled
-				|| (this.$store.getters.callHasJustEnded && !this.hasCall)
+				|| (this.callViewStore.callHasJustEnded && !this.hasCall)
 				|| (!this.conversation.canStartCall && !this.hasCall)
 				|| this.isInLobby
 				|| this.conversation.readOnly
@@ -280,7 +280,7 @@ export default {
 				return t('spreed', 'Nextcloud Talk was updated, you need to reload the page before you can start or join a call.')
 			}
 
-			if (this.$store.getters.callHasJustEnded) {
+			if (this.callViewStore.callHasJustEnded) {
 				return t('spreed', 'This call has just ended')
 			}
 
@@ -338,7 +338,7 @@ export default {
 
 	watch: {
 		token() {
-			this.$store.dispatch('resetCallHasJustEnded')
+			this.callViewStore.resetCallHasJustEnded()
 		}
 	},
 

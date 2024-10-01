@@ -21,13 +21,13 @@ export const useCallViewStore = defineStore('callView', {
 		presentationStarted: false,
 		selectedVideoPeerId: null,
 		qualityWarningTooltipDismissed: false,
+		callEndedTimeout: null,
 		participantRaisedHands: {},
 		backgroundImageAverageColorCache: {},
-		callHasJustEnded: null,
 	}),
 
 	getters: {
-		callHasJustEnded: (state) => !!state.callHasJustEnded,
+		callHasJustEnded: (state) => !!state.callEndedTimeout,
 		isQualityWarningTooltipDismissed: (state) => state.qualityWarningTooltipDismissed,
 		participantRaisedHandList: (state) => {
 			return state.participantRaisedHands
@@ -70,9 +70,6 @@ export const useCallViewStore = defineStore('callView', {
 		},
 		clearBackgroundImageAverageColorCache(state) {
 			state.backgroundImageAverageColorCache = {}
-		},
-		setCallHasJustEnded(state, value) {
-			state.callHasJustEnded = value
 		},
 
 		// Actions
@@ -205,23 +202,25 @@ export const useCallViewStore = defineStore('callView', {
 			this.isEmptyCallView = value
 		},
 
-		setCallHasJustEnded(context, timestamp) {
-			// Check the time difference between the current time and the call end time.
-			// Then, disable the CallButton for the remaining time until 10 seconds after the call ends.
-			const timeDiff = Math.abs(Date.now() / 1000 - timestamp)
+		/**
+		 * Checks the time difference between the current time and the call end time.
+		 * Then, disable the CallButton for the remaining time until 10 seconds after the call ends.
+		 * @param {number} timestamp timestamp of callEnded message (in seconds)
+		 */
+		setCallHasJustEnded(timestamp) {
+			const timeDiff = Math.abs(Date.now() - timestamp * 1000)
 			if (10000 - timeDiff < 0) {
 				return
 			}
-			clearTimeout(context.state.callHasJustEnded)
-			const timeoutId = setTimeout(() => {
-				context.dispatch('resetCallHasJustEnded')
+			clearTimeout(this.callEndedTimeout)
+			this.callEndedTimeout = setTimeout(() => {
+				this.resetCallHasJustEnded()
 			}, Math.max(0, 10000 - timeDiff))
-			context.commit('setCallHasJustEnded', timeoutId)
 		},
 
-		resetCallHasJustEnded(context) {
-			clearTimeout(context.state.callHasJustEnded)
-			context.commit('setCallHasJustEnded', null)
+		resetCallHasJustEnded() {
+			clearTimeout(this.callEndedTimeout)
+			this.callEndedTimeout = null
 		}
 	},
 })
