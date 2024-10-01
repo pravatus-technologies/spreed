@@ -249,7 +249,7 @@ export default {
 		},
 
 		isGrid() {
-			return this.$store.getters.isGrid && !this.isSidebar
+			return this.callViewStore.isGrid && !this.isSidebar
 		},
 
 		selectedVideoPeerId() {
