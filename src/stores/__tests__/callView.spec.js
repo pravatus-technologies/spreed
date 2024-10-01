@@ -17,6 +17,7 @@ jest.mock('../../services/BrowserStorage.js', () => ({
 describe('callViewStore', () => {
 	const TOKEN = 'XXTOKENXX'
 	const BROWSER_STORAGE_KEY = 'callprefs-XXTOKENXX-isgrid'
+	const PEER_ID = 'peer-id'
 	let callViewStore
 
 	beforeEach(() => {
@@ -181,6 +182,71 @@ describe('callViewStore', () => {
 			// state kept, not reset
 			expect(callViewStore.isGrid).toBeFalsy()
 			expect(callViewStore.isStripeOpen).toBeFalsy()
+		})
+
+		it('does not change last state if provided nothing', () => {
+			expect(callViewStore.lastIsGrid).toEqual(null)
+			expect(callViewStore.lastIsStripeOpen).toEqual(null)
+			callViewStore.setCallViewMode({
+				isGrid: true,
+				isStripeOpen: false,
+			})
+			expect(callViewStore.lastIsGrid).toBeFalsy()
+			expect(callViewStore.lastIsStripeOpen).toBeTruthy()
+
+			callViewStore.setCallViewMode({
+				clearLast: false,
+			})
+			expect(callViewStore.lastIsGrid).toBeFalsy()
+			expect(callViewStore.lastIsStripeOpen).toBeTruthy()
+		})
+	})
+
+	describe('other actions', () => {
+		it('sets value on forceCallView', () => {
+			expect(callViewStore.forceCallView).toBeFalsy()
+			callViewStore.setForceCallView(true)
+			expect(callViewStore.forceCallView).toBeTruthy()
+		})
+
+		it('sets value on isViewerOverlay', () => {
+			expect(callViewStore.isViewerOverlay).toBeFalsy()
+			callViewStore.setIsViewerOverlay(true)
+			expect(callViewStore.isViewerOverlay).toBeTruthy()
+		})
+
+		it('sets value on isEmptyCallView', () => {
+			expect(callViewStore.isEmptyCallView).toBeTruthy()
+			callViewStore.setIsEmptyCallView(false)
+			expect(callViewStore.isEmptyCallView).toBeFalsy()
+		})
+
+		it('sets value on selectedVideoPeerId', () => {
+			callViewStore.setSelectedVideoPeerId(PEER_ID)
+			expect(callViewStore.selectedVideoPeerId).toBe(PEER_ID)
+		})
+
+		it('sets timeout if timestamp is lesser than 10 seconds', () => {
+			callViewStore.setCallHasJustEnded(Date.now() / 1000 - 3)
+			expect(callViewStore.callHasJustEnded).toBeTruthy()
+		})
+
+		it('does not set timeout if timestamp is bigger than 10 seconds', () => {
+			callViewStore.setCallHasJustEnded(Date.now() / 1000 - 15)
+			expect(callViewStore.callHasJustEnded).toBeFalsy()
+		})
+
+		it('resets callHasJustEnded after passed time', () => {
+			// Arrange
+			jest.useFakeTimers()
+			callViewStore.setCallHasJustEnded(Date.now() / 1000 - 2)
+			expect(callViewStore.callHasJustEnded).toBeTruthy()
+			// Skip 4 seconds
+			jest.advanceTimersByTime(4000)
+			expect(callViewStore.callHasJustEnded).toBeTruthy()
+			// Skip remaining 4 seconds
+			jest.advanceTimersByTime(4000)
+			expect(callViewStore.callHasJustEnded).toBeFalsy()
 		})
 	})
 })
