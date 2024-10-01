@@ -648,7 +648,7 @@ export default {
 				return
 			}
 
-			if (this.$store.getters.presentationStarted) {
+			if (this.callViewStore.presentationStarted) {
 				this.$store.dispatch('setCallViewMode', {
 					isGrid: false,
 					isStripeOpen: false,

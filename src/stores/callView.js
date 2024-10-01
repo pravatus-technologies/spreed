@@ -27,7 +27,6 @@ export const useCallViewStore = defineStore('callView', {
 	}),
 
 	getters: {
-		presentationStarted: (state) => state.presentationStarted,
 		callHasJustEnded: (state) => !!state.callHasJustEnded,
 		selectedVideoPeerId: (state) => {
 			return state.selectedVideoPeerId
@@ -55,9 +54,6 @@ export const useCallViewStore = defineStore('callView', {
 		// Mutations
 		selectedVideoPeerId(state, value) {
 			state.selectedVideoPeerId = value
-		},
-		presentationStarted(state, value) {
-			state.presentationStarted = value
 		},
 		setQualityWarningTooltipDismissed(state, { qualityWarningTooltipDismissed }) {
 			state.qualityWarningTooltipDismissed = qualityWarningTooltipDismissed
@@ -168,11 +164,11 @@ export const useCallViewStore = defineStore('callView', {
 		startPresentation(context) {
 			// don't start twice, this would prevent multiple
 			// screen shares to clear the last call view state
-			if (context.getters.presentationStarted) {
+			if (this.presentationStarted) {
 				return
 			}
 
-			context.commit('presentationStarted', true)
+			this.presentationStarted = true
 			// switch off grid mode during presentation and collapse
 			// the stripe to focus on the screen share, but continue remembering
 			// the last state
@@ -192,7 +188,7 @@ export const useCallViewStore = defineStore('callView', {
 		 * @param {object} context default store context;
 		 */
 		stopPresentation(context) {
-			if (!context.getters.presentationStarted) {
+			if (!this.presentationStarted) {
 				return
 			}
 			if (!this.isGrid && !this.isStripeOpen) {
@@ -204,7 +200,7 @@ export const useCallViewStore = defineStore('callView', {
 					clearLast: false,
 				})
 			}
-			context.commit('presentationStarted', false)
+			this.presentationStarted = false
 		},
 
 		dismissQualityWarningTooltip(context) {
