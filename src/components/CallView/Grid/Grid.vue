@@ -879,7 +879,7 @@ export default {
 		},
 
 		isSelected(callParticipantModel) {
-			return callParticipantModel.attributes.peerId === this.$store.getters.selectedVideoPeerId
+			return callParticipantModel.attributes.peerId === this.callViewStore.selectedVideoPeerId
 		},
 
 		isModelWithVideo(callParticipantModel) {

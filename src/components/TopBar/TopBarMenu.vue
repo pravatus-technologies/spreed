@@ -438,7 +438,7 @@ export default {
 
 		changeView() {
 			this.$store.dispatch('setCallViewMode', { isGrid: !this.isGrid, clearLast: false })
-			this.$store.dispatch('selectedVideoPeerId', null)
+			this.callViewStore.setSelectedVideoPeerId(null)
 		},
 
 		showMediaSettingsDialog() {

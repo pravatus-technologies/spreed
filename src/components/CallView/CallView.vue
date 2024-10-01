@@ -253,7 +253,7 @@ export default {
 		},
 
 		selectedVideoPeerId() {
-			return this.$store.getters.selectedVideoPeerId
+			return this.callViewStore.selectedVideoPeerId
 		},
 
 		selectedCallParticipantModel() {
@@ -434,9 +434,9 @@ export default {
 			}
 		},
 		hasLocalVideo(newValue) {
-			if (this.$store.getters.selectedVideoPeerId === 'local') {
+			if (this.selectedVideoPeerId === 'local') {
 				if (!newValue) {
-					this.$store.dispatch('selectedVideoPeerId', null)
+					this.callViewStore.setSelectedVideoPeerId(null)
 				}
 			}
 		},
@@ -657,7 +657,7 @@ export default {
 			} else {
 				this.$store.dispatch('startPresentation')
 			}
-			this.$store.dispatch('selectedVideoPeerId', null)
+			this.callViewStore.setSelectedVideoPeerId(null)
 			this.screens.splice(index, 1)
 			this.screens.unshift(id)
 		},
@@ -686,7 +686,7 @@ export default {
 			if (this.isSidebar) {
 				return
 			}
-			this.$store.dispatch('selectedVideoPeerId', peerId)
+			this.callViewStore.setSelectedVideoPeerId(peerId)
 			this.$store.dispatch('startPresentation')
 		},
 		handleClickLocalVideo() {
@@ -695,7 +695,7 @@ export default {
 				return
 			}
 			// Deselect possible selected video
-			this.$store.dispatch('selectedVideoPeerId', 'local')
+			this.callViewStore.setSelectedVideoPeerId('local')
 			this.$store.dispatch('startPresentation')
 		},
 

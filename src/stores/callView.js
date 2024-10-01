@@ -28,9 +28,6 @@ export const useCallViewStore = defineStore('callView', {
 
 	getters: {
 		callHasJustEnded: (state) => !!state.callHasJustEnded,
-		selectedVideoPeerId: (state) => {
-			return state.selectedVideoPeerId
-		},
 		isQualityWarningTooltipDismissed: (state) => state.qualityWarningTooltipDismissed,
 		participantRaisedHandList: (state) => {
 			return state.participantRaisedHands
@@ -52,9 +49,6 @@ export const useCallViewStore = defineStore('callView', {
 
 	actions: {
 		// Mutations
-		selectedVideoPeerId(state, value) {
-			state.selectedVideoPeerId = value
-		},
 		setQualityWarningTooltipDismissed(state, { qualityWarningTooltipDismissed }) {
 			state.qualityWarningTooltipDismissed = qualityWarningTooltipDismissed
 		},
@@ -90,8 +84,8 @@ export const useCallViewStore = defineStore('callView', {
 			this.isViewerOverlay = value
 		},
 
-		selectedVideoPeerId(context, value) {
-			context.commit('selectedVideoPeerId', value)
+		setSelectedVideoPeerId(value) {
+			this.selectedVideoPeerId = value
 		},
 
 		joinCall(context, { token }) {
