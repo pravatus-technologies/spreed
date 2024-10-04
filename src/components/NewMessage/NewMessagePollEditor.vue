@@ -13,6 +13,18 @@
 			{{ t('spreed', 'Question') }}
 		</p>
 		<NcTextField :value.sync="pollForm.question" :label="t('spreed', 'Ask a question')" v-on="$listeners" />
+		<!--native file picker, hidden -->
+		<input id="poll-upload"
+			ref="pollImport"
+			type="file"
+			class="hidden-visually"
+			@change="importPoll">
+		<NcButton class="poll-editor__button"
+			type="secondary"
+			wide
+			@click="triggerImport">
+			{{ t('spreed', 'Import poll from file') }}
+		</NcButton>
 
 		<!-- Poll options -->
 		<p class="poll-editor__caption">
@@ -57,6 +69,12 @@
 		<template #actions>
 			<NcButton type="tertiary" @click="dismissEditor">
 				{{ t('spreed', 'Dismiss') }}
+			</NcButton>
+			<NcButton v-if="isFilled"
+				type="secondary"
+				:href="exportPollBlob"
+				:download="exportPollFileName">
+				{{ t('spreed', 'Export') }}
 			</NcButton>
 			<NcButton type="primary" :disabled="!isFilled" @click="createPoll">
 				{{ t('spreed', 'Create poll') }}
@@ -111,10 +129,23 @@ export default {
 		})
 		const isFilled = computed(() => !!pollForm.question || pollForm.options.some(option => option))
 
+		const exportPollBlob = computed(() => {
+			if (!isFilled.value) {
+				return null
+			}
+			const jsonString = JSON.stringify(pollForm, null, 2)
+			const blob = new Blob([jsonString], { type: 'application/json' })
+
+			return URL.createObjectURL(blob)
+		})
+		const exportPollFileName = `Talk Poll ${new Date().toISOString().slice(0, 10)}`
+
 		return {
 			pollsStore: usePollsStore(),
 			pollForm,
 			isFilled,
+			exportPollBlob,
+			exportPollFileName,
 		}
 	},
 
@@ -149,6 +180,31 @@ export default {
 			}
 		},
 
+		triggerImport() {
+			this.$refs.pollImport.click()
+		},
+
+		importPoll(event) {
+			if (!event?.target?.files?.[0]) {
+				return
+			}
+
+			const reader = new FileReader()
+			reader.onload = (e) => {
+				try {
+					const jsonObject = JSON.parse(e.target.result)
+					for (const key of Object.keys(this.pollForm)) {
+						if (jsonObject[key] !== undefined) {
+							this.pollForm[key] = jsonObject[key]
+						}
+					}
+				} catch (error) {
+					console.error('Error while parsing JSON:', error)
+				}
+			}
+
+			reader.readAsText(event.target.files[0])
+		},
 	},
 }
 </script>
@@ -160,6 +216,10 @@ export default {
 		margin: calc(var(--default-grid-baseline) * 2) 0 var(--default-grid-baseline);
 		font-weight: bold;
 		color: var(--color-primary-element);
+	}
+
+	&__button {
+		margin-block: 8px;
 	}
 
 	&__option {
