@@ -12,19 +12,19 @@
 		<p class="poll-editor__caption">
 			{{ t('spreed', 'Question') }}
 		</p>
-		<NcTextField :value.sync="pollQuestion" :label="t('spreed', 'Ask a question')" v-on="$listeners" />
+		<NcTextField :value.sync="pollForm.question" :label="t('spreed', 'Ask a question')" v-on="$listeners" />
 
 		<!-- Poll options -->
 		<p class="poll-editor__caption">
 			{{ t('spreed', 'Answers') }}
 		</p>
-		<div v-for="(option, index) in pollOptions"
+		<div v-for="(option, index) in pollForm.options"
 			:key="index"
 			class="poll-editor__option">
 			<NcTextField ref="pollOption"
-				:value.sync="pollOptions[index]"
+				:value.sync="pollForm.options[index]"
 				:label="t('spreed', 'Answer {option}', {option: index + 1})" />
-			<NcButton v-if="pollOptions.length > 2"
+			<NcButton v-if="pollForm.options.length > 2"
 				type="tertiary"
 				:aria-label="t('spreed', 'Delete poll option')"
 				@click="deleteOption(index)">
@@ -47,10 +47,10 @@
 			{{ t('spreed', 'Settings') }}
 		</p>
 		<div class="poll-editor__settings">
-			<NcCheckboxRadioSwitch :checked.sync="isPrivate" type="checkbox">
+			<NcCheckboxRadioSwitch :checked.sync="pollForm.isPrivate" type="checkbox">
 				{{ t('spreed', 'Private poll') }}
 			</NcCheckboxRadioSwitch>
-			<NcCheckboxRadioSwitch :checked.sync="isMultipleAnswer" type="checkbox">
+			<NcCheckboxRadioSwitch :checked.sync="pollForm.isMultipleAnswer" type="checkbox">
 				{{ t('spreed', 'Multiple answers') }}
 			</NcCheckboxRadioSwitch>
 		</div>
@@ -58,8 +58,7 @@
 			<NcButton type="tertiary" @click="dismissEditor">
 				{{ t('spreed', 'Dismiss') }}
 			</NcButton>
-			<!-- create poll button-->
-			<NcButton type="primary" @click="createPoll">
+			<NcButton type="primary" :disabled="!isFilled" @click="createPoll">
 				{{ t('spreed', 'Create poll') }}
 			</NcButton>
 		</template>
@@ -67,6 +66,8 @@
 </template>
 
 <script>
+import { computed, reactive } from 'vue'
+
 import Close from 'vue-material-design-icons/Close.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 
@@ -102,31 +103,26 @@ export default {
 	emits: ['close'],
 
 	setup() {
-		return {
-			pollsStore: usePollsStore(),
-		}
-	},
-
-	data() {
-		return {
+		const pollForm = reactive({
+			question: '',
+			options: ['', ''],
 			isPrivate: false,
 			isMultipleAnswer: false,
-			pollQuestion: '',
-			pollOptions: ['', ''],
-		}
-	},
+		})
+		const isFilled = computed(() => !!pollForm.question || pollForm.options.some(option => option))
 
-	computed: {
-		isFilled() {
-			return !!this.pollQuestion || this.pollOptions.some(option => option)
-		},
+		return {
+			pollsStore: usePollsStore(),
+			pollForm,
+			isFilled,
+		}
 	},
 
 	methods: {
 		t,
-		// Remove a previously added option
+
 		deleteOption(index) {
-			this.pollOptions.splice(index, 1)
+			this.pollForm.options.splice(index, 1)
 		},
 
 		dismissEditor() {
@@ -134,7 +130,7 @@ export default {
 		},
 
 		addOption() {
-			this.pollOptions.push('')
+			this.pollForm.options.push('')
 			this.$nextTick(() => {
 				this.$refs.pollOption.at(-1).focus()
 			})
@@ -143,10 +139,10 @@ export default {
 		async createPoll() {
 			const poll = await this.pollsStore.createPoll({
 				token: this.token,
-				question: this.pollQuestion,
-				options: this.pollOptions,
-				resultMode: this.isPrivate ? 1 : 0,
-				maxVotes: this.isMultipleAnswer ? 0 : 1
+				question: this.pollForm.question,
+				options: this.pollForm.options,
+				resultMode: this.pollForm.isPrivate ? 1 : 0,
+				maxVotes: this.pollForm.isMultipleAnswer ? 0 : 1
 			})
 			if (poll) {
 				this.dismissEditor()
