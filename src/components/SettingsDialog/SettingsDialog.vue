@@ -89,6 +89,18 @@
 				{{ t('spreed', 'Sounds for chat and call notifications can be adjusted in the personal settings.') }} ↗
 			</a>
 		</NcAppSettingsSection>
+		<NcAppSettingsSection id="calls"
+			:name="t('spreed', 'Calls')"
+			class="app-settings-section">
+			<NcCheckboxRadioSwitch id="call-media"
+				:checked="mediaDefaultStateEnabled"
+				:disabled="mediaLoading"
+				type="switch"
+				class="checkbox"
+				@update:checked="toggleMediaDefaultState">
+				{{ t('spreed', 'Turn off camera and microphone by default when joining a call') }}
+			</NcCheckboxRadioSwitch>
+		</NcAppSettingsSection>
 		<NcAppSettingsSection id="performance"
 			:name="t('spreed', 'Performance')"
 			class="app-settings-section">
@@ -235,6 +247,7 @@ export default {
 			attachmentFolderLoading: true,
 			privacyLoading: false,
 			playSoundsLoading: false,
+			mediaLoading: false,
 		}
 	},
 
@@ -261,6 +274,10 @@ export default {
 
 		typingStatusPrivacyIsPublic() {
 			return this.settingsStore.typingStatusPrivacy === PRIVACY.PUBLIC
+		},
+
+		mediaDefaultStateEnabled() {
+			return this.settingsStore.mediaDefaultState
 		},
 
 		settingsUrl() {
@@ -360,6 +377,18 @@ export default {
 				showError(t('spreed', 'Error while saving sounds setting'))
 			}
 			this.playSoundsLoading = false
+		},
+
+		async toggleMediaDefaultState(value) {
+			this.mediaLoading = true
+			try {
+				await this.settingsStore.setMediaDefaultState(value)
+				showSuccess(t('spreed', 'Your default media state has been saved'))
+			} catch (exception) {
+				showError(t('spreed', 'Error while setting default media state'))
+			} finally {
+				this.mediaLoading = false
+			}
 		},
 
 		handleShowSettings() {

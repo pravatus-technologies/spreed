@@ -31,6 +31,7 @@ import VolumeIndicator from '../../UIShared/VolumeIndicator.vue'
 
 import { PARTICIPANT } from '../../../constants.js'
 import BrowserStorage from '../../../services/BrowserStorage.js'
+import { useSettingsStore } from '../../../stores/settings.js'
 
 export default {
 	name: 'LocalAudioControlButton',
@@ -65,6 +66,12 @@ export default {
 			type: String,
 			required: true,
 		},
+	},
+
+	setup() {
+		return {
+			storeSettings: useSettingsStore(),
+		}
 	},
 
 	computed: {
@@ -109,6 +116,10 @@ export default {
 				? t('spreed', 'Mute audio')
 				: t('spreed', 'Unmute audio')
 		},
+
+		mediaDefaultStateEnabled() {
+			return this.storeSettings.mediaDefaultState
+		},
 	},
 
 	created() {
@@ -118,6 +129,9 @@ export default {
 
 	mounted() {
 		subscribe('local-audio-control-button:toggle-audio', this.updateDeviceState)
+		if (this.mediaDefaultStateEnabled) {
+			this.model.disableAudio()
+		}
 	},
 
 	beforeDestroy() {
