@@ -255,7 +255,7 @@
     "Message of {user}" : "Message of {user}",
     "Message of a deleted user in {conversation}" : "Message of a deleted user in {conversation}",
     "Talk conversations" : "Talk conversations",
-    "Talk to %s" : "Talk to %s",
+    "Talk to %s" : "Konvo with %s",
     "An error occurred. Please contact your administrator." : "An error occurred. Please contact your administrator.",
     "File is not shared, or shared but not with the user" : "File is not shared, or shared but not with the user",
     "No account available to delete." : "No account available to delete.",
