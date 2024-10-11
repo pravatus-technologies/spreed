@@ -32,6 +32,7 @@ class Listener implements IEventListener {
 			return;
 		}
 
-		$this->manager->updateChangelog($event->getUserId());
+		// No need to add Update Log Channel
+		// $this->manager->updateChangelog($event->getUserId());
 	}
 }
