@@ -281,7 +281,7 @@ class Config {
 	}
 
 	public function getAttachmentFolder(string $userId): string {
-		$defaultAttachmentFolder = $this->config->getAppValue('spreed', 'default_attachment_folder', '/Talk');
+		$defaultAttachmentFolder = $this->config->getAppValue('spreed', 'default_attachment_folder', '/Konvo');
 		return $this->config->getUserValue($userId, 'spreed', 'attachment_folder', $defaultAttachmentFolder);
 	}
 

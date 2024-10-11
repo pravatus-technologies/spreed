@@ -65,7 +65,7 @@ class TalkWidget implements IAPIWidget, IIconWidget, IButtonWidget, IOptionWidge
 	 * @inheritDoc
 	 */
 	public function getTitle(): string {
-		return $this->l10n->t('Talk mentions');
+		return $this->l10n->t('Konvo mentions');
 	}
 
 	/**

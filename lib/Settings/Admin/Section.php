@@ -50,7 +50,7 @@ class Section implements IIconSection {
 	 * @since 9.1
 	 */
 	public function getName(): string {
-		return $this->l->t('Talk');
+		return $this->l->t('Konvo');
 	}
 
 	/**

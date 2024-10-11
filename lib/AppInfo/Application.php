@@ -374,7 +374,7 @@ class Application extends App implements IBootstrap {
 			$user = $userSession->getUser();
 			return [
 				'id' => self::APP_ID,
-				'name' => $l->t('Talk'),
+				'name' => $l->t('Konvo'),
 				'href' => $urlGenerator->linkToRouteAbsolute('spreed.Page.index'),
 				'icon' => $urlGenerator->imagePath(self::APP_ID, 'app.svg'),
 				'order' => 3,

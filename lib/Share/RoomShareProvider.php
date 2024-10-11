@@ -48,7 +48,7 @@ class RoomShareProvider implements IShareProvider {
 	// Special share type for user modified room shares
 	public const SHARE_TYPE_USERROOM = 11;
 
-	public const TALK_FOLDER = '/Talk';
+	public const TALK_FOLDER = '/Konvo';
 	public const TALK_FOLDER_PLACEHOLDER = '/{TALK_PLACEHOLDER}';
 
 	private CappedMemoryCache $sharesByIdCache;

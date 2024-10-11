@@ -43,8 +43,8 @@ export default {
 	computed: {
 		ariaLabel() {
 			return this.sidebarState.isOpen
-				? t('spreed', 'Close Talk sidebar')
-				: t('spreed', 'Open Talk sidebar')
+				? t('spreed', 'Close Konvo sidebar')
+				: t('spreed', 'Open Konvo sidebar')
 		},
 	},
 
